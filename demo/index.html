@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KalAI Agent Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #0078D7;
+            border-bottom: 2px solid #0078D7;
+            padding-bottom: 10px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #0078D7;
+        }
+        button {
+            background-color: #0078D7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>KalAI Agent Demo</h1>
+    
+    <div class="card">
+        <h2>Try "Edit with AI" on this JavaScript function</h2>
+        <p>Select the function below, right-click, and choose "KalAI: Edit with AI". Then, try one of these prompts:</p>
+        <ul>
+            <li>Add error handling to this function</li>
+            <li>Optimize this code for better performance</li>
+            <li>Add JSDoc comments to document this function</li>
+            <li>Convert this to use modern ES6+ features</li>
+        </ul>
+        
+        <pre><code>
+// This function calculates the factorial of a number
+function calculateFactorial(num) {
+    var result = 1;
+    for (var i = 1; i <= num; i++) {
+        result = result * i;
+    }
+    return result;
+}
+
+// This function generates Fibonacci sequence
+function generateFibonacci(count) {
+    var fibonacci = [];
+    fibonacci[0] = 0;
+    fibonacci[1] = 1;
+    
+    for (var i = 2; i < count; i++) {
+        fibonacci[i] = fibonacci[i-1] + fibonacci[i-2];
+    }
+    
+    return fibonacci;
+}
+
+// This function checks if a string is a palindrome
+function isPalindrome(str) {
+    var reversed = str.split('').reverse().join('');
+    return str === reversed;
+}
+        </code></pre>
+        
+        <button onclick="runDemo()">Run Demo</button>
+        <div id="result"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Instructions</h2>
+        <p>To use this demo with KalAI Agent:</p>
+        <ol>
+            <li>Open this file in VS Code</li>
+            <li>Make sure KalAI Agent extension is installed and activated</li>
+            <li>Select one of the JavaScript functions above</li>
+            <li>Right-click and select "KalAI: Edit with AI" from the context menu</li>
+            <li>Enter your instructions (e.g., "Add error handling")</li>
+            <li>Review and accept the changes</li>
+        </ol>
+        <p>You can also try the chat interface by clicking on the KalAI Agent icon in the Activity Bar.</p>
+    </div>
+    
+    <script>
+        function runDemo() {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            
+            // Calculate factorial of 5
+            const factorial = calculateFactorial(5);
+            
+            // Generate 10 Fibonacci numbers
+            const fibonacci = generateFibonacci(10);
+            
+            // Check if "racecar" is a palindrome
+            const palindromeCheck = isPalindrome("racecar");
+            
+            result.innerHTML = `
+                <h3>Demo Results:</h3>
+                <p>Factorial of 5: ${factorial}</p>
+                <p>First 10 Fibonacci numbers: ${fibonacci.join(', ')}</p>
+                <p>"racecar" is a palindrome: ${palindromeCheck}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
