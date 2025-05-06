@@ -1,5 +1,7 @@
 # Kalai Agent - AI-Powered Coding Assistant
 
+![Kalai Agent Banner](media/icon.png)
+
 Kalai Agent is a powerful VS Code extension that provides context-aware code assistance using advanced AI capabilities.
 
 ## Features
@@ -9,6 +11,8 @@ Kalai Agent is a powerful VS Code extension that provides context-aware code ass
 - **Multi-Language Support**: Works with JavaScript, TypeScript, Python, Java, and more
 - **Framework Detection**: Automatically detects and understands popular frameworks
 
+<!-- ![Context Analysis](media/docs/context-analysis.png) -->
+
 ### 💡 Smart Code Assistance
 - **Code Generation**: Generate code based on natural language descriptions
 - **Code Explanations**: Get detailed explanations of complex code segments
@@ -17,6 +21,9 @@ Kalai Agent is a powerful VS Code extension that provides context-aware code ass
 
 ### 🔄 Interactive Features
 - **Chat Interface**: Natural conversation with the AI assistant
+
+![Chat Interface](media/mainpage.png)
+
 - **Code Context**: View and share code context with the AI
 - **Command Palette Integration**: Quick access to all features
 - **Selection-Based Assistance**: Get help with selected code segments
@@ -26,6 +33,8 @@ Kalai Agent is a powerful VS Code extension that provides context-aware code ass
 - **Documentation Help**: Generate and improve code documentation
 - **Best Practices**: Suggestions for following coding standards
 - **Testing Support**: Help with writing and improving tests
+
+<!-- ![Code Editing](media/docs/code-editing.png) -->
 
 ## Getting Started
 
