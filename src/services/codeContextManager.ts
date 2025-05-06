@@ -1,12 +1,33 @@
 import * as vscode from 'vscode';
 import { ContextSelection } from './contextSelectorService';
-import { FileContext } from '../types/codeTypes';
+
+export interface FileContext {
+    content: string;
+    language: string;
+    path: string;
+    relativePath: string;
+    parsed?: {
+        structure?: {
+            template?: string;
+            script?: string;
+            style?: string;
+        };
+        imports?: string[];
+        framework?: string;
+    };
+    selection?: {
+        start: number;
+        end: number;
+        text: string;
+    };
+}
 
 export interface ProjectContext {
     files: FileContext[];
     dependencies?: Record<string, string>;
     activeFile?: FileContext;
     detectedFramework?: string;
+    relatedFiles?: FileContext[]; // Add this property
 }
 
 export class CodeContextManager {
@@ -132,10 +153,9 @@ export class CodeContextManager {
         }
     }
 
-    private async analyzeProjectStructure(mainFile: FileContext): Promise<string> {
+    private async analyzeProjectStructure(): Promise<string> {
         let projectType = 'unknown';
 
-        // Detect project type from dependencies and files
         if (this.currentContext.dependencies) {
             if (this.currentContext.dependencies['@kalxjs-framework/runtime']) {
                 projectType = 'KalxJS Application';
@@ -146,12 +166,6 @@ export class CodeContextManager {
             }
         }
 
-        // Detect from entry files
-        const entryFiles = await vscode.workspace.findFiles(
-            '{index.html,index.js,main.js,app.js}',
-            '**/node_modules/**'
-        );
-
         return projectType;
     }
 
@@ -160,7 +174,7 @@ export class CodeContextManager {
         await this.updateProjectDependencies();
 
         if (this.currentContext.activeFile) {
-            const projectType = await this.analyzeProjectStructure(this.currentContext.activeFile);
+            const projectType = await this.analyzeProjectStructure();
             this.currentContext.detectedFramework = projectType;
         }
 

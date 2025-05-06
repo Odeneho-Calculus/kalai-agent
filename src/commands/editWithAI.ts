@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
 import { AIService } from '../services/aiService';
+import { AIRequestContext } from '../types/aiTypes';
 
 export async function handleEditWithAI(editor: vscode.TextEditor): Promise<void> {
   const selection = editor.selection;
 
   // Get the selected text or the entire document if nothing is selected
   const text = editor.document.getText(selection.isEmpty ? undefined : selection);
-  const fileName = editor.document.fileName;
-  const languageId = editor.document.languageId;
 
   if (!text) {
     vscode.window.showErrorMessage('No text selected or document is empty');
@@ -44,10 +43,13 @@ export async function handleEditWithAI(editor: vscode.TextEditor): Promise<void>
         const aiService = new AIService();
 
         // Create context object with file information
-        const context = {
-          fileName,
-          languageId,
-          instruction
+        const context: AIRequestContext = {
+          files: [],
+          currentFile: {
+            fileName: editor.document.fileName,
+            languageId: editor.document.languageId,
+            instruction: instruction
+          }
         };
 
         // Send to AI service

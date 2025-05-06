@@ -1,6 +1,6 @@
-# KalAI Agent Local Development Guide
+# Kalai Agent Local Development Guide
 
-This guide provides detailed instructions for setting up, running, and testing the KalAI Agent VS Code extension locally before publishing to the marketplace.
+This guide provides detailed instructions for setting up, running, and testing the Kalai Agent VS Code extension locally before publishing to the marketplace.
 
 ## Prerequisites
 
@@ -59,7 +59,11 @@ npm run watch
 
 This will start the TypeScript compiler in watch mode, which automatically recompiles when you make changes.
 
-## Running the Extension Locally
+## Running the Extension
+
+1. Press F5 to open a new window with your extension loaded
+2. Find the Kalai Agent icon in the Activity Bar
+3. Click it to open the chat interface
 
 ### Method 1: Using VS Code's Extension Development Host
 

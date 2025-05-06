@@ -1,6 +1,6 @@
-# KalAI Agent Quick Start Guide
+# Kalai Agent Quick Start Guide
 
-This guide provides the essential steps to get KalAI Agent running locally in the fastest way possible.
+This guide provides the essential steps to get Kalai Agent running locally in the fastest way possible.
 
 ## Prerequisites
 
@@ -51,9 +51,9 @@ code --install-extension kalai-agent-0.1.0.vsix
 
 ## Step 4: Using the Extension
 
-1. In the Extension Development Host window, click on the KalAI Agent icon in the activity bar
+1. In the Extension Development Host window, click on the Kalai Agent icon in the activity bar
 2. The chat interface will open in the sidebar
-3. To use "Edit with AI", select some code, right-click, and choose "KalAI: Edit with AI"
+3. To use "Edit with AI", select some code, right-click, and choose "Kalai: Edit with AI"
 
 ## Troubleshooting
 

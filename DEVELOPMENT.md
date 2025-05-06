@@ -1,4 +1,4 @@
-# KalAI Agent Development Guide
+# Kalai Agent Development Guide
 
 This document provides detailed instructions for setting up, running, and testing the KalAI Agent VS Code extension.
 
@@ -134,6 +134,13 @@ npm run package
 This will create a .vsix file that can be installed in VS Code.
 
 ## Publishing to VS Code Marketplace
+
+1. Update version in package.json
+2. Package the extension:
+   ```bash
+   npm run package
+   ```
+3. The packaged extension will be named `kalai-agent-x.x.x.vsix`
 
 1. Install vsce:
    ```bash

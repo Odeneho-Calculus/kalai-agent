@@ -1,48 +1,91 @@
-# KalAI Agent - AI-Powered Coding Assistant
+# Kalai Agent - AI-Powered Coding Assistant
 
-KalAI Agent is a powerful VS Code extension that provides context-aware code assistance, intelligent suggestions, and seamless project analysis.
+Kalai Agent is a powerful VS Code extension that provides context-aware code assistance using advanced AI capabilities.
 
 ## Features
 
-- 🤖 Context-aware code suggestions
-- 📁 Smart project analysis
-- 🔄 Multiple file context support
-- 💡 Intelligent code explanations
-- 🎨 Customizable interface
-- 📦 Framework detection
+### 🤖 Intelligent Code Understanding
+- **Context-Aware Suggestions**: Analyzes your entire codebase for accurate suggestions
+- **Multi-Language Support**: Works with JavaScript, TypeScript, Python, Java, and more
+- **Framework Detection**: Automatically detects and understands popular frameworks
+
+### 💡 Smart Code Assistance
+- **Code Generation**: Generate code based on natural language descriptions
+- **Code Explanations**: Get detailed explanations of complex code segments
+- **Refactoring Suggestions**: Receive suggestions for code improvements
+- **Bug Detection**: Identify potential issues and get fix suggestions
+
+### 🔄 Interactive Features
+- **Chat Interface**: Natural conversation with the AI assistant
+- **Code Context**: View and share code context with the AI
+- **Command Palette Integration**: Quick access to all features
+- **Selection-Based Assistance**: Get help with selected code segments
+
+### 🛠 Development Tools
+- **Project Analysis**: Understand project structure and dependencies
+- **Documentation Help**: Generate and improve code documentation
+- **Best Practices**: Suggestions for following coding standards
+- **Testing Support**: Help with writing and improving tests
 
 ## Getting Started
 
 1. Install the extension from VS Code Marketplace
-2. Open the KalAI Agent sidebar
-3. Configure your API key in settings
-4. Start coding with AI assistance!
+2. Open any code file in VS Code
+3. Access the Kalai Agent through:
+   - Activity Bar Icon
+   - Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+   - Context Menu (right-click)
+
+## Usage Examples
+
+### Chat Interface
+- Click the Kalai icon in the Activity Bar
+- Type your question or request
+- Use `@` to reference files
+- Use `#` for special commands
+
+### Code Editing
+1. Select code in editor
+2. Right-click and choose "KalAI: Edit with AI"
+3. Describe your desired changes
+4. Review and apply suggestions
 
 ## Commands
 
-- `KalAI: Start Chat` - Open the chat interface
-- `KalAI: Get Context` - Analyze current file/project
-- `KalAI: Clear Chat` - Start a new chat session
+- `Kalai: Start Chat` - Open the AI chat interface
+- `Kalai: Edit with AI` - Get AI assistance for selected code
 
-## Configuration
+## Extension Settings
 
-```json
-{
-    "kalai-agent.apiKey": "your-api-key",
-    "kalai-agent.modelName": "preferred-model",
-    "kalai-agent.aiEndpoint": "custom-endpoint"
-}
-```
+The extension can be customized through VS Code's settings interface.
 
 ## Requirements
 
-- VS Code 1.60.0 or higher
-- Active internet connection
+- Visual Studio Code ^1.99.1
+- Active internet connection for AI features
 
-## License
+## Privacy & Security
 
-MIT License - see [LICENSE](LICENSE) for details
+- All code analysis is performed locally
+- No code or sensitive data is stored externally
+- Secure communication with AI services
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## Release Notes
+
+### 1.0.0
+- Initial release
+- Core features implementation
+- Multi-language support
+- Interactive chat interface
 
 ## Support
 
-For issues and feature requests, please visit our [GitHub repository](https://github.com/Odeneho-Calculus/kalai-agent).
+Found a bug or have a suggestion? Please open an issue on our [GitHub repository](https://github.com/Odeneho-Calculus/kalai-agent/issues).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -22,8 +22,9 @@ export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.
       <meta http-equiv="Content-Security-Policy" content="
         default-src 'none';
         style-src ${webview.cspSource} 'unsafe-inline';
-        script-src 'nonce-${nonce}' 'unsafe-eval' 'unsafe-inline';
-        connect-src 'self';
+        script-src ${webview.cspSource} 'unsafe-inline';
+        img-src ${webview.cspSource} https:;
+        connect-src ${webview.cspSource} https:;
       ">
       <title>KalAI Agent Chat</title>
     </head>

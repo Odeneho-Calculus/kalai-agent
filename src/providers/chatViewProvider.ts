@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import { getWebviewContent } from '../utils/getWebviewContent';
 import { AIService } from '../services/aiService';
 import { ChatHistoryService } from '../services/chatHistoryService';
-import { CodeContextManager, ProjectContext } from '../services/codeContextManager';
+import { CodeContextManager, ProjectContext, FileContext } from '../services/codeContextManager';
 import { ContextSelectorService } from '../services/contextSelectorService';
+import { AIRequestContext } from '../types/aiTypes';
 
 interface ChatViewState {
   messages: any[];
@@ -13,7 +14,7 @@ interface ChatViewState {
 interface WebviewMessage {
   command: string;
   text?: string;
-  context?: any;
+  context?: AIRequestContext;
   state?: any;
 }
 
@@ -50,7 +51,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
-    context: vscode.WebviewViewResolveContext,
+    _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
   ) {
     console.log('Resolving webview view...');
@@ -89,17 +90,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private getPersistedState(context: vscode.WebviewViewResolveContext): ChatViewState {
-    if (context.state) {
-      try {
-        return JSON.parse(context.state.toString()) as ChatViewState;
-      } catch (e) {
-        console.error('Failed to parse persisted state:', e);
-      }
-    }
-    return { messages: [] };
-  }
-
   private updateState(partialState: Partial<ChatViewState>) {
     this._state = { ...this._state, ...partialState, lastUpdate: Date.now() };
     // Update persisted state
@@ -126,15 +116,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         return;
       }
 
-      const context = await this._codeContextManager.getContextFromSelection(contextSelection);
-      const formattedContext = this.formatContextForDisplay(context);
+      const projectContext = await this._codeContextManager.getContextFromSelection(contextSelection);
+
+      // Create AIRequestContext with the required currentFile property
+      const aiContext: AIRequestContext = this.convertToAIContext(projectContext);
+
+      const formattedContext = this.formatContextForDisplay(projectContext);
 
       webviewView.webview.postMessage({
         command: 'fileContext',
         text: formattedContext,
-        fileName: context.activeFile?.path || 'Multiple Files',
-        languageId: context.activeFile?.language || 'multiple',
-        context
+        fileName: aiContext.currentFile.fileName,
+        languageId: aiContext.currentFile.languageId,
+        context: aiContext
       });
     } catch (error) {
       console.error('Error getting file context:', error);
@@ -146,18 +140,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private detectIndentation(document: vscode.TextDocument): string {
-    // Get first non-empty line
-    for (let i = 0; i < document.lineCount; i++) {
-      const line = document.lineAt(i);
-      if (!line.isEmptyOrWhitespace) {
-        const indent = line.text.match(/^[\t ]*/)?.[0] || '';
-        return indent.includes('\t') ? '\t' : '    ';
-      }
-    }
-    return '    '; // Default to 4 spaces
-  }
-
   private formatContextForDisplay(context: ProjectContext): string {
     let output = '';
 
@@ -165,6 +147,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       output += `Active File: ${context.activeFile.path}\n`;
       output += `Language: ${context.activeFile.language}\n\n`;
       output += `Content:\n${context.activeFile.content}\n\n`;
+    }
+
+    if (context.files && context.files.length > 0) {
+      output += 'Related Files:\n';
+      context.files.forEach((file: FileContext) => {
+        output += `- ${file.path}\n`;
+      });
+      output += '\n';
     }
 
     if (context.dependencies) {
@@ -180,15 +170,32 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     return output;
   }
 
+  private convertToAIContext(projectContext: ProjectContext): AIRequestContext {
+    return {
+      files: projectContext.files || [],
+      dependencies: projectContext.dependencies,
+      activeFile: projectContext.activeFile,
+      detectedFramework: projectContext.detectedFramework,
+      currentFile: {
+        fileName: projectContext.activeFile?.path || '',
+        languageId: projectContext.activeFile?.language || 'plaintext',
+        filePath: projectContext.activeFile?.path || '',
+        instruction: undefined
+      }
+    };
+  }
+
   private async handleMessage(message: any, webviewView: vscode.WebviewView) {
     try {
       switch (message.command) {
         case 'sendMessage':
-          const context = message.text.includes('@context') ?
+          const projectContext = message.text.includes('@context') ?
             await this._codeContextManager.getFullContext() :
             this._codeContextManager.getRelevantContext(message.text);
 
-          const response = await this._aiService.sendMessage(message.text || '', context);
+          const aiContext = this.convertToAIContext(projectContext);
+          const response = await this._aiService.sendMessage(message.text || '', aiContext);
+
           this.updateState({
             messages: [...this._state.messages, { text: message.text, type: 'user' }, { text: response, type: 'ai' }]
           });
@@ -230,6 +237,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
               state: { messages: session.messages }
             });
           }
+          break;
+
+        case 'clearChat':
+          this.updateState({
+            messages: [{
+              text: "Chat cleared! How else can I help you?",
+              type: "ai",
+              timestamp: Date.now()
+            }]
+          });
           break;
       }
     } catch (error) {

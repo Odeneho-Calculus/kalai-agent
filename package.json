@@ -1,17 +1,16 @@
 {
   "name": "kalai-agent",
-  "displayName": "KalAI Agent",
+  "displayName": "Kalai Agent",
   "description": "AI-powered coding assistant with context-aware suggestions and code analysis",
-  "version": "0.1.0",
+  "version": "1.0.4",
   "publisher": "kalculus",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.99.1"
   },
   "categories": [
+    "Other",
     "Programming Languages",
-    "Machine Learning",
-    "Snippets",
-    "Other"
+    "Snippets"
   ],
   "keywords": [
     "ai",
@@ -29,6 +28,10 @@
     "type": "git",
     "url": "https://github.com/Odeneho-Calculus/kalai-agent"
   },
+  "bugs": {
+    "url": "https://github.com/Odeneho-Calculus/kalai-agent/issues"
+  },
+  "homepage": "https://github.com/Odeneho-Calculus/kalai-agent#readme",
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -37,30 +40,39 @@
     "commands": [
       {
         "command": "kalai-agent.startChat",
-        "title": "KalAI: Start Chat",
-        "category": "KalAI Agent"
+        "title": "Kalai: Start Chat",
+        "category": "Kalai Agent"
       },
       {
         "command": "kalai-agent.editWithAI",
-        "title": "KalAI: Edit with AI",
-        "category": "KalAI Agent"
+        "title": "Kalai: Edit with AI",
+        "category": "Kalai Agent"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
           "id": "kalai-agent",
-          "title": "KalAI Agent",
+          "title": "Kalai Agent",
           "icon": "media/icon.svg"
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "kalai-agent.chatView",
+        "contents": "Welcome to Kalai Agent! Start chatting to get AI-powered code assistance.\n[Start Chat](command:kalai-agent.startChat)",
+        "when": "!kalai-agent.isLoading"
+      }
+    ],
     "views": {
       "kalai-agent": [
         {
+          "type": "webview",
           "id": "kalai-agent.chatView",
           "name": "AI Chat",
-          "type": "webview"
+          "visibility": "visible",
+          "when": "true"
         }
       ]
     },
@@ -72,42 +84,21 @@
           "group": "9_cutcopypaste"
         }
       ]
-    },
-    "configuration": {
-      "title": "KalAI Agent",
-      "properties": {
-        "kalai-agent.aiEndpoint": {
-          "type": "string",
-          "default": "https://openrouter.ai/api/v1/chat/completions",
-          "description": "API endpoint for AI model (OpenRouter, Hugging Face, etc.)"
-        },
-        "kalai-agent.apiKey": {
-          "type": "string",
-          "default": "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",
-          "description": "OpenRouter API key"
-        },
-        "kalai-agent.modelName": {
-          "type": "string",
-          "default": "qwen/qwen3-30b-a3b:free",
-          "description": "AI model to use for code assistance"
-        }
-      }
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "lint": "eslint src --ext ts",
-    "test": "jest"
+    "vscode:prepublish": "npm run compile",
+    "compile": "webpack --config webpack.prod.config.js && webpack --config webpack.webview.config.js",
+    "watch": "webpack --watch --config webpack.prod.config.js --info-verbosity verbose & webpack --watch --config webpack.webview.config.js --info-verbosity verbose",
+    "package": "npm run compile && vsce package",
+    "publish": "vsce publish"
   },
   "dependencies": {
     "axios": "^1.6.0",
     "markdown-it": "^13.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-markdown": "^10.1.0"
+    "react-markdown": "^8.0.7"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
@@ -127,9 +118,9 @@
     "jest": "^29.7.0",
     "style-loader": "^3.3.3",
     "ts-jest": "^29.1.1",
-    "ts-loader": "^9.5.0",
+    "ts-loader": "^9.5.2",
     "typescript": "^5.2.2",
-    "webpack": "^5.89.0",
+    "webpack": "^5.99.7",
     "webpack-cli": "^5.1.4"
   }
 }
