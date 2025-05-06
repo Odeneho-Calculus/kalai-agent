@@ -3,10 +3,10 @@ import { ChatViewProvider } from './providers/chatViewProvider';
 import { handleEditWithAI } from './commands/editWithAI';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('KalAI Agent is now active!');
+  console.log('kalai Agent is now active!');
 
-  // Register Chat View Provider
-  const chatViewProvider = new ChatViewProvider(context.extensionUri);
+  // Register Chat View Provider with context
+  const chatViewProvider = new ChatViewProvider(context.extensionUri, context);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       'kalai-agent.chatView',
@@ -34,5 +34,5 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-  console.log('KalAI Agent is now deactivated');
+  console.log('kalai Agent is now deactivated');
 }

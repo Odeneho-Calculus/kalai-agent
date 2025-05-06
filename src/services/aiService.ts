@@ -1,9 +1,19 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
+import { ProjectContext } from './codeContextManager';
 
-interface AIRequestContext {
-  fileName?: string;
-  languageId?: string;
+interface CodeContext {
+  prefix: string;        // Code before cursor
+  suffix: string;        // Code after cursor
+  filePath: string;     // Current file path
+  language: string;     // Programming language
+  indent: string;       // Current line indentation
+  relativePath: string; // File path relative to workspace
+  siblingFiles?: string[]; // Related files in the same directory
+  dependencies?: Record<string, string>; // Project dependencies
+}
+
+interface AIRequestContext extends ProjectContext {
   instruction?: string;
   [key: string]: any;
 }
@@ -21,6 +31,7 @@ export class AIService {
   private readonly modelName: string;
   private readonly apiKey: string;
   private readonly maxRetries: number = 3;
+  private contextWindow: number = 2048; // Number of tokens to include for context
 
   constructor() {
     const config = vscode.workspace.getConfiguration('kalai-agent');
@@ -29,59 +40,160 @@ export class AIService {
     this.apiKey = config.get<string>('apiKey') || '';
   }
 
-  /**
-   * Send a message to the AI model and get a response
-   */
   public async sendMessage(message: string, context?: AIRequestContext): Promise<string> {
-    const systemPrompt = this.createSystemPrompt(context);
+    try {
+      let systemPrompt = 'You are kalai, an AI programming assistant.';
+      let userPrompt = message;
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: message }
-    ];
+      // Enhance prompt based on message type
+      if (message.toLowerCase().includes('what is') ||
+        message.toLowerCase().includes('explain') ||
+        message.toLowerCase().includes('about')) {
+        systemPrompt += ' When explaining projects or code, analyze:\n';
+        systemPrompt += '1. Project type and framework\n';
+        systemPrompt += '2. Main dependencies and their purposes\n';
+        systemPrompt += '3. Project structure and architecture\n';
+        systemPrompt += '4. Key features and functionality\n';
 
-    return this.callAIModel(messages);
-  }
+        if (context) {
+          userPrompt = this.createProjectAnalysisPrompt(context) + '\n' + message;
+        }
+      }
 
-  /**
-   * Edit code based on user instructions
-   */
-  public async editCode(code: string, context: AIRequestContext): Promise<string> {
-    const instruction = context.instruction || 'Improve this code';
-    const language = context.languageId || 'unknown';
-    const fileName = context.fileName || 'unknown';
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ];
 
-    const systemPrompt = `You are KalAI Agent, an expert code assistant. 
-You are working with a ${language} file named ${fileName}.
-Your task is to: ${instruction}
-Respond ONLY with the improved code, without explanations or markdown formatting.`;
-
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: code }
-    ];
-
-    return this.callAIModel(messages);
-  }
-
-  /**
-   * Create a system prompt based on context
-   */
-  private createSystemPrompt(context?: AIRequestContext): string {
-    let prompt = 'You are KalAI Agent, an AI coding assistant for VS Code. ';
-
-    if (context?.languageId) {
-      prompt += `You are currently working with ${context.languageId} code. `;
+      return await this.callAIModel(messages);
+    } catch (error) {
+      console.error('Error in sendMessage:', error);
+      throw error;
     }
+  }
 
-    prompt += 'Provide clear, concise, and helpful responses. Include code examples when appropriate.';
+  public async editCode(code: string, context: AIRequestContext): Promise<string> {
+    const enhancedContext = await this.getEnhancedContext(context);
+    const prompt = this.createEditPrompt(code, enhancedContext);
+
+    const messages = [
+      { role: 'system', content: this.createSystemPrompt(context) },
+      { role: 'user', content: prompt }
+    ];
+
+    return this.callAIModel(messages);
+  }
+
+  private async createEnhancedPrompt(message: string, context?: AIRequestContext): Promise<string> {
+    let prompt = message;
+
+    if (context?.currentFile) {
+      prompt = `Context for ${context.currentFile.language} file ${context.currentFile.relativePath}:\n\n`;
+
+      // Add relevant code context
+      if (context.currentFile.prefix) {
+        prompt += '```' + context.currentFile.language + '\n';
+        prompt += context.currentFile.prefix + '\n';
+        prompt += '```\n\n';
+      }
+
+      // Add user's question/instruction
+      prompt += `Question: ${message}\n`;
+
+      // Add project context if available
+      if (context.currentFile.dependencies) {
+        prompt += '\nProject dependencies:\n';
+        Object.entries(context.currentFile.dependencies)
+          .forEach(([dep, version]) => prompt += `${dep}@${version}\n`);
+      }
+    }
 
     return prompt;
   }
 
-  /**
-   * Call the AI model API with retry logic
-   */
+  private createSystemPrompt(context?: AIRequestContext): string {
+    let prompt = `You are an AI programming assistant with expertise in ${context?.currentFile?.language || 'multiple programming languages'}. `;
+    prompt += 'Follow these guidelines:\n';
+    prompt += '1. Provide clear, concise, and practical solutions\n';
+    prompt += '2. Include only necessary code without explanations unless asked\n';
+    prompt += '3. Follow the current code style and conventions\n';
+    prompt += '4. Consider project dependencies and context\n';
+    prompt += '5. Focus on production-quality, maintainable code\n';
+    return prompt;
+  }
+
+  private createEditPrompt(code: string, context: AIRequestContext): string {
+    return `Please ${context.instruction || 'improve'} the following code while maintaining its core functionality:
+
+\`\`\`${context.currentFile?.language || 'text'}
+${code}
+\`\`\`
+
+Consider the current project context and dependencies. Respond only with the modified code.`;
+  }
+
+  private createProjectAnalysisPrompt(context: ProjectContext): string {
+    let prompt = 'Based on the following project context:\n\n';
+
+    // Add file structure context
+    if (context.activeFile) {
+      prompt += `Main file: ${context.activeFile.relativePath}\n`;
+      prompt += `Type: ${context.activeFile.language}\n\n`;
+
+      // Add framework detection
+      if (context.detectedFramework) {
+        prompt += `Framework: ${context.detectedFramework}\n`;
+      }
+
+      // Add dependencies context
+      if (context.dependencies) {
+        prompt += 'Dependencies:\n';
+        Object.entries(context.dependencies).forEach(([dep, version]) => {
+          prompt += `- ${dep}@${version}\n`;
+        });
+        prompt += '\n';
+      }
+
+      // Add file content
+      prompt += 'File content:\n```\n';
+      prompt += context.activeFile.content;
+      prompt += '\n```\n\n';
+    }
+
+    // Add project structure understanding
+    prompt += 'Project analysis:\n';
+    if (context.files.length > 1) {
+      prompt += 'Related files:\n';
+      context.files.slice(0, 3).forEach(file => {
+        prompt += `- ${file.relativePath} (${file.language})\n`;
+      });
+    }
+
+    return prompt;
+  }
+
+  private async getEnhancedContext(context: AIRequestContext): Promise<AIRequestContext> {
+    if (!context.currentFile) return context;
+
+    try {
+      // Get sibling files
+      const currentDir = vscode.Uri.file(context.currentFile.filePath).fsPath;
+      const files = await vscode.workspace.findFiles(
+        new vscode.RelativePattern(currentDir, '**/*'),
+        '**/node_modules/**'
+      );
+
+      context.currentFile.siblingFiles = files
+        .map(f => f.fsPath)
+        .filter(f => f !== context.currentFile?.filePath);
+
+      return context;
+    } catch (error) {
+      console.warn('Error enhancing context:', error);
+      return context;
+    }
+  }
+
   private async callAIModel(messages: any[], retryCount = 0): Promise<string> {
     try {
       const response = await axios.post<AIModelResponse>(

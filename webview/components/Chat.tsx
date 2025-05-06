@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { HistoryPage } from './pages/HistoryPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 interface Message {
     id: string;
@@ -19,10 +21,12 @@ interface ChatProps {
     vscode: VSCodeAPI;
 }
 
+type Page = 'chat' | 'history' | 'settings';
+
 export const Chat: React.FC<ChatProps> = ({ vscode }) => {
     const [messages, setMessages] = useState<Message[]>([{
         id: 'welcome',
-        text: "👋 Hi! I'm KalAI. How can I help you with your code today?",
+        text: "👋 Hi! I'm kalai. How can I help you with your code today?",
         type: "ai",
         timestamp: Date.now()
     }]);
@@ -33,6 +37,44 @@ export const Chat: React.FC<ChatProps> = ({ vscode }) => {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
+    const [currentPage, setCurrentPage] = useState<Page>('chat');
+
+    const startNewChat = () => {
+        // Clear messages but keep welcome message
+        setMessages([{
+            id: 'welcome',
+            text: "👋 Hi! I'm kalai Agent. How can I help you with your code today?",
+            type: "ai",
+            timestamp: Date.now()
+        }]);
+
+        // Save current chat to history if it has messages
+        if (messages.length > 1) {
+            vscode.postMessage({
+                command: 'saveToHistory',
+                messages: messages
+            });
+        }
+    };
+
+    const getContext = () => {
+        setIsLoading(true);
+        vscode.postMessage({ command: 'getFileContext' });
+
+        // Add timeout to prevent infinite loading
+        setTimeout(() => {
+            if (isLoading) {
+                setIsLoading(false);
+                setMessages(prev => [...prev, {
+                    id: `error-${Date.now()}`,
+                    text: "Sorry, couldn't get file context. Please try again.",
+                    type: 'ai',
+                    isError: true,
+                    timestamp: Date.now()
+                }]);
+            }
+        }, 5000); // 5 second timeout
+    };
 
     // Auto-resize textarea as content grows
     useEffect(() => {
@@ -94,6 +136,15 @@ export const Chat: React.FC<ChatProps> = ({ vscode }) => {
                         setMessages(messagesWithIds);
                     }
                     break;
+                case 'fileContext':
+                    setIsLoading(false);
+                    setMessages(prev => [...prev, {
+                        id: `ai-${Date.now()}`,
+                        text: `I'm looking at: ${message.fileName}\n\n${message.text}`,
+                        type: 'ai',
+                        timestamp: Date.now()
+                    }]);
+                    break;
             }
         };
 
@@ -146,438 +197,432 @@ export const Chat: React.FC<ChatProps> = ({ vscode }) => {
         vscode.postMessage({ command: 'clearChat' });
     };
 
-    const getContext = () => {
-        setIsLoading(true);
-        vscode.postMessage({ command: 'getFileContext' });
-    };
+    const renderPage = () => {
+        switch (currentPage) {
+            case 'history':
+                return <HistoryPage vscode={vscode} onClose={() => setCurrentPage('chat')} />;
+            case 'settings':
+                return <SettingsPage vscode={vscode} onClose={() => setCurrentPage('chat')} />;
+            default:
+                return (
+                    <div className="chat-container">
+                        <style>{`
+                            /* Enhanced Styles */
+                            :root {
+                                --primary-color: var(--vscode-button-background);
+                                --secondary-color: var(--vscode-button-hoverBackground);
+                                --dark-bg: var(--vscode-editor-background);
+                                --darker-bg: var(--vscode-sideBar-background);
+                                --lighter-bg: var(--vscode-input-background);
+                                --border-color: var(--vscode-panel-border);
+                                --text-color: var(--vscode-foreground);
+                                --icon-size: 18px;
+                            }
 
-    const newChat = () => {
-        clearChat();
-    };
+                            .chat-container {
+                                display: flex;
+                                flex-direction: column;
+                                height: 100vh;
+                                max-width: 100%;
+                                margin: 0 auto;
+                                background: var(--dark-bg);
+                                color: var(--text-color);
+                                font-family: var(--vscode-font-family);
+                                box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+                            }
 
-    const showHistory = () => {
-        vscode.postMessage({ command: 'showHistory' });
-    };
+                            .chat-header {
+                                display: flex;
+                                align-items: center;
+                                padding: 12px 16px;
+                                background: var(--darker-bg);
+                                border-bottom: 1px solid var(--border-color);
+                                z-index: 10;
+                            }
 
-    const showSettings = () => {
-        vscode.postMessage({ command: 'showSettings' });
-    };
+                            .header-title {
+                                font-size: 16px;
+                                font-weight: 500;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            }
 
-    return (
-        <div className="chat-container">
-            <style>{`
-                /* Enhanced Styles */
-                :root {
-                    --primary-color: var(--vscode-button-background);
-                    --secondary-color: var(--vscode-button-hoverBackground);
-                    --dark-bg: var(--vscode-editor-background);
-                    --darker-bg: var(--vscode-sideBar-background);
-                    --lighter-bg: var(--vscode-input-background);
-                    --border-color: var(--vscode-panel-border);
-                    --text-color: var(--vscode-foreground);
-                    --icon-size: 18px;
-                }
+                            .header-title::before {
+                                content: "🤖";
+                                font-size: 18px;
+                            }
 
-                .chat-container {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100vh;
-                    max-width: 100%;
-                    margin: 0 auto;
-                    background: var(--dark-bg);
-                    color: var(--text-color);
-                    font-family: var(--vscode-font-family);
-                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-                }
+                            .header-actions {
+                                margin-left: auto;
+                                display: flex;
+                                align-items: center;
+                                gap: 14px;
+                            }
 
-                .chat-header {
-                    display: flex;
-                    align-items: center;
-                    padding: 12px 16px;
-                    background: var(--darker-bg);
-                    border-bottom: 1px solid var(--border-color);
-                    z-index: 10;
-                }
+                            .icon-button {
+                                background: transparent;
+                                border: none;
+                                padding: 6px;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: var(--text-color);
+                                opacity: 0.8;
+                                transition: all 0.2s ease;
+                            }
 
-                .header-title {
-                    font-size: 16px;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
+                            .icon-button:hover {
+                                opacity: 1;
+                                background: rgba(255, 255, 255, 0.1);
+                                transform: translateY(-1px);
+                            }
 
-                .header-title::before {
-                    content: "🤖";
-                    font-size: 18px;
-                }
+                            .icon-button svg {
+                                width: var(--icon-size);
+                                height: var(--icon-size);
+                            }
 
-                .header-actions {
-                    margin-left: auto;
-                    display: flex;
-                    align-items: center;
-                    gap: 14px;
-                }
+                            .messages-container {
+                                flex: 1;
+                                overflow-y: auto;
+                                padding: 20px;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 24px;
+                                scroll-behavior: smooth;
+                            }
 
-                .icon-button {
-                    background: transparent;
-                    border: none;
-                    padding: 6px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: var(--text-color);
-                    opacity: 0.8;
-                    transition: all 0.2s ease;
-                }
+                            .message {
+                                display: flex;
+                                gap: 16px;
+                                max-width: 85%;
+                                animation: fadeIn 0.4s ease forwards, slideIn 0.3s ease forwards;
+                            }
 
-                .icon-button:hover {
-                    opacity: 1;
-                    background: rgba(255, 255, 255, 0.1);
-                    transform: translateY(-1px);
-                }
+                            .message-user {
+                                margin-left: auto;
+                                flex-direction: row-reverse;
+                            }
 
-                .icon-button svg {
-                    width: var(--icon-size);
-                    height: var(--icon-size);
-                }
+                            @keyframes fadeIn {
+                                from {
+                                    opacity: 0;
+                                }
+                                to {
+                                    opacity: 1;
+                                }
+                            }
 
-                .messages-container {
-                    flex: 1;
-                    overflow-y: auto;
-                    padding: 20px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 24px;
-                    scroll-behavior: smooth;
-                }
+                            @keyframes slideIn {
+                                from {
+                                    transform: translateY(10px);
+                                }
+                                to {
+                                    transform: translateY(0);
+                                }
+                            }
 
-                .message {
-                    display: flex;
-                    gap: 16px;
-                    max-width: 85%;
-                    animation: fadeIn 0.4s ease forwards, slideIn 0.3s ease forwards;
-                }
+                            .message-avatar {
+                                width: 36px;
+                                height: 36px;
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 16px;
+                                flex-shrink: 0;
+                                background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+                                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                            }
 
-                .message-user {
-                    margin-left: auto;
-                    flex-direction: row-reverse;
-                }
+                            .message-user .message-avatar {
+                                background: linear-gradient(135deg, #484848, #2c2c2c);
+                            }
 
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                    }
-                    to {
-                        opacity: 1;
-                    }
-                }
+                            .message-content {
+                                padding: 14px;
+                                border-radius: 12px;
+                                background: var(--lighter-bg);
+                                line-height: 1.5;
+                                position: relative;
+                                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                                border: 1px solid var(--border-color);
+                                overflow-wrap: break-word;
+                            }
 
-                @keyframes slideIn {
-                    from {
-                        transform: translateY(10px);
-                    }
-                    to {
-                        transform: translateY(0);
-                    }
-                }
+                            .message-ai .message-content {
+                                border-top-left-radius: 0;
+                            }
 
-                .message-avatar {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 16px;
-                    flex-shrink: 0;
-                    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-                }
+                            .message-user .message-content {
+                                background: #2a3b52;
+                                color: white;
+                                border-top-right-radius: 0;
+                            }
 
-                .message-user .message-avatar {
-                    background: linear-gradient(135deg, #484848, #2c2c2c);
-                }
+                            .message-content.error {
+                                background: rgba(255, 80, 80, 0.1);
+                                border: 1px solid rgba(255, 80, 80, 0.3);
+                            }
 
-                .message-content {
-                    padding: 14px;
-                    border-radius: 12px;
-                    background: var(--lighter-bg);
-                    line-height: 1.5;
-                    position: relative;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    border: 1px solid var(--border-color);
-                    overflow-wrap: break-word;
-                }
+                            .input-container {
+                                padding: 12px 16px;
+                                border-top: 1px solid var(--border-color);
+                                background: var(--darker-bg);
+                            }
 
-                .message-ai .message-content {
-                    border-top-left-radius: 0;
-                }
+                            .input-wrapper {
+                                display: flex;
+                                gap: 12px;
+                                background: var(--lighter-bg);
+                                border-radius: 12px;
+                                padding: 4px 4px 4px 16px;
+                                transition: all 0.3s ease;
+                                border: 1px solid var(--border-color);
+                            }
 
-                .message-user .message-content {
-                    background: #2a3b52;
-                    color: white;
-                    border-top-right-radius: 0;
-                }
+                            .input-wrapper:focus-within {
+                                box-shadow: 0 0 0 2px var(--primary-color);
+                                border-color: var(--primary-color);
+                            }
 
-                .message-content.error {
-                    background: rgba(255, 80, 80, 0.1);
-                    border: 1px solid rgba(255, 80, 80, 0.3);
-                }
+                            .message-input {
+                                flex: 1;
+                                background: transparent;
+                                border: none;
+                                color: var(--text-color);
+                                font-size: 14px;
+                                line-height: 1.5;
+                                padding: 10px 0;
+                                min-height: 42px;
+                                resize: none;
+                            }
 
-                .input-container {
-                    padding: 12px 16px;
-                    border-top: 1px solid var(--border-color);
-                    background: var(--darker-bg);
-                }
+                            .message-input:focus {
+                                outline: none;
+                            }
 
-                .input-wrapper {
-                    display: flex;
-                    gap: 12px;
-                    background: var(--lighter-bg);
-                    border-radius: 12px;
-                    padding: 4px 4px 4px 16px;
-                    transition: all 0.3s ease;
-                    border: 1px solid var(--border-color);
-                }
+                            .send-button {
+                                width: 42px;
+                                height: 42px;
+                                padding: 0;
+                                border-radius: 10px;
+                                border: none;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background: var(--primary-color);
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                            }
 
-                .input-wrapper:focus-within {
-                    box-shadow: 0 0 0 2px var(--primary-color);
-                    border-color: var(--primary-color);
-                }
+                            .send-button:hover:not(:disabled) {
+                                filter: brightness(1.1);
+                                transform: translateY(-2px);
+                            }
 
-                .message-input {
-                    flex: 1;
-                    background: transparent;
-                    border: none;
-                    color: var(--text-color);
-                    font-size: 14px;
-                    line-height: 1.5;
-                    padding: 10px 0;
-                    min-height: 42px;
-                    resize: none;
-                }
+                            .send-button:disabled {
+                                opacity: 0.5;
+                                cursor: not-allowed;
+                            }
 
-                .message-input:focus {
-                    outline: none;
-                }
+                            .send-button svg {
+                                width: 20px;
+                                height: 20px;
+                                fill: white;
+                            }
 
-                .send-button {
-                    width: 42px;
-                    height: 42px;
-                    padding: 0;
-                    border-radius: 10px;
-                    border: none;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: var(--primary-color);
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
+                            /* Typing animation */
+                            .thinking {
+                                display: flex;
+                                gap: 6px;
+                                padding: 12px;
+                                align-items: center;
+                            }
 
-                .send-button:hover:not(:disabled) {
-                    filter: brightness(1.1);
-                    transform: translateY(-2px);
-                }
+                            .thinking-dot {
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 50%;
+                                background: var(--primary-color);
+                                animation: blink 1.4s infinite both;
+                            }
 
-                .send-button:disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
+                            .thinking-dot:nth-child(2) {
+                                animation-delay: 0.2s;
+                            }
 
-                .send-button svg {
-                    width: 20px;
-                    height: 20px;
-                    fill: white;
-                }
+                            .thinking-dot:nth-child(3) {
+                                animation-delay: 0.4s;
+                            }
 
-                /* Typing animation */
-                .thinking {
-                    display: flex;
-                    gap: 6px;
-                    padding: 12px;
-                    align-items: center;
-                }
+                            @keyframes blink {
+                                0%, 80%, 100% {
+                                    transform: scale(0.5);
+                                    opacity: 0.6;
+                                }
+                                40% {
+                                    transform: scale(1);
+                                    opacity: 1;
+                                }
+                            }
 
-                .thinking-dot {
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    background: var(--primary-color);
-                    animation: blink 1.4s infinite both;
-                }
+                            /* New message indicator */
+                            .new-message-indicator {
+                                position: fixed;
+                                bottom: 80px;
+                                left: 50%;
+                                transform: translateX(-50%) translateY(100%);
+                                background: var(--primary-color);
+                                color: white;
+                                padding: 8px 16px;
+                                border-radius: 20px;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                                cursor: pointer;
+                                opacity: 0;
+                                transition: all 0.3s ease;
+                                font-size: 13px;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                                z-index: 100;
+                            }
 
-                .thinking-dot:nth-child(2) {
-                    animation-delay: 0.2s;
-                }
+                            .new-message-indicator.visible {
+                                transform: translateX(-50%) translateY(0);
+                                opacity: 1;
+                            }
 
-                .thinking-dot:nth-child(3) {
-                    animation-delay: 0.4s;
-                }
+                            /* Code block styling */
+                            .message pre {
+                                margin: 10px 0;
+                                padding: 12px;
+                                background: var(--dark-bg);
+                                border-radius: 6px;
+                                overflow-x: auto;
+                                position: relative;
+                                border: 1px solid var(--border-color);
+                            }
 
-                @keyframes blink {
-                    0%, 80%, 100% {
-                        transform: scale(0.5);
-                        opacity: 0.6;
-                    }
-                    40% {
-                        transform: scale(1);
-                        opacity: 1;
-                    }
-                }
+                            .message pre::before {
+                                content: "";
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 3px;
+                                background: linear-gradient(90deg, var(--primary-color), transparent);
+                            }
 
-                /* New message indicator */
-                .new-message-indicator {
-                    position: fixed;
-                    bottom: 80px;
-                    left: 50%;
-                    transform: translateX(-50%) translateY(100%);
-                    background: var(--primary-color);
-                    color: white;
-                    padding: 8px 16px;
-                    border-radius: 20px;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    cursor: pointer;
-                    opacity: 0;
-                    transition: all 0.3s ease;
-                    font-size: 13px;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                    z-index: 100;
-                }
+                            .message code {
+                                font-family: 'Courier New', monospace;
+                                font-size: 14px;
+                            }
+                        `}</style>
 
-                .new-message-indicator.visible {
-                    transform: translateX(-50%) translateY(0);
-                    opacity: 1;
-                }
-
-                /* Code block styling */
-                .message pre {
-                    margin: 10px 0;
-                    padding: 12px;
-                    background: var(--dark-bg);
-                    border-radius: 6px;
-                    overflow-x: auto;
-                    position: relative;
-                    border: 1px solid var(--border-color);
-                }
-
-                .message pre::before {
-                    content: "";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 3px;
-                    background: linear-gradient(90deg, var(--primary-color), transparent);
-                }
-
-                .message code {
-                    font-family: 'Courier New', monospace;
-                    font-size: 14px;
-                }
-            `}</style>
-
-            <div className="chat-header">
-                <div className="header-title">KalAI Agent</div>
-                <div className="header-actions">
-                    <button className="icon-button" onClick={newChat} title="New Chat">
-                        <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </button>
-                    <button className="icon-button" onClick={getContext} title="Get Context">
-                        <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-                            <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" />
-                        </svg>
-                    </button>
-                    <button className="icon-button" onClick={showHistory} title="History">
-                        <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
-                    </button>
-                    <button className="icon-button" onClick={clearChat} title="Clear Chat">
-                        <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                    </button>
-                    <button className="icon-button" onClick={showSettings} title="Settings">
-                        <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-                            <circle cx="12" cy="12" r="3" />
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div
-                className="messages-container"
-                ref={messagesContainerRef}
-                onScroll={handleScroll}
-            >
-                {messages.map((msg) => (
-                    <div key={msg.id} className={`message message-${msg.type}`}>
-                        <div className="message-avatar">
-                            {msg.type === 'ai' ? '🤖' : '👤'}
+                        <div className="chat-header">
+                            <div className="header-title">kalai Agent</div>
+                            <div className="header-actions">
+                                <button className="icon-button" onClick={startNewChat} title="New Chat">
+                                    <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                                        <path d="M12 5v14M5 12h14" />
+                                    </svg>
+                                </button>
+                                <button className="icon-button" onClick={getContext} title="Get Context">
+                                    <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                                        <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" />
+                                    </svg>
+                                </button>
+                                <button className="icon-button" onClick={() => setCurrentPage('history')} title="History">
+                                    <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                </button>
+                                <button className="icon-button" onClick={clearChat} title="Clear Chat">
+                                    <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                    </svg>
+                                </button>
+                                <button className="icon-button" onClick={() => setCurrentPage('settings')} title="Settings">
+                                    <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                                        <circle cx="12" cy="12" r="3" />
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                        <div className={`message-content ${msg.isError ? 'error' : ''}`}>
-                            <ReactMarkdown>{msg.text}</ReactMarkdown>
+
+                        <div
+                            className="messages-container"
+                            ref={messagesContainerRef}
+                            onScroll={handleScroll}
+                        >
+                            {messages.map((msg) => (
+                                <div key={msg.id} className={`message message-${msg.type}`}>
+                                    <div className="message-avatar">
+                                        {msg.type === 'ai' ? '🤖' : '👤'}
+                                    </div>
+                                    <div className={`message-content ${msg.isError ? 'error' : ''}`}>
+                                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                    </div>
+                                </div>
+                            ))}
+                            {isLoading && (
+                                <div className="message message-ai">
+                                    <div className="message-avatar">🤖</div>
+                                    <div className="message-content thinking">
+                                        <div className="thinking-dot"></div>
+                                        <div className="thinking-dot"></div>
+                                        <div className="thinking-dot"></div>
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {showScrollIndicator && !isAtBottom && (
+                            <div
+                                className={`new-message-indicator ${!isAtBottom ? 'visible' : ''}`}
+                                onClick={() => scrollToBottom()}
+                            >
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none">
+                                    <path d="M18 15l-6 6-6-6" />
+                                    <path d="M12 3v18" />
+                                </svg>
+                                New messages
+                            </div>
+                        )}
+
+                        <div className="input-container">
+                            <form onSubmit={handleSubmit} className="input-wrapper">
+                                <textarea
+                                    ref={textareaRef}
+                                    value={inputText}
+                                    onChange={(e) => setInputText(e.target.value)}
+                                    placeholder="Ask me anything or use @ for files, # for commands..."
+                                    className="message-input"
+                                    onKeyDown={handleKeyDown}
+                                />
+                                <button
+                                    type="submit"
+                                    className="send-button"
+                                    disabled={isLoading || !inputText.trim()}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                                    </svg>
+                                </button>
+                            </form>
                         </div>
                     </div>
-                ))}
-                {isLoading && (
-                    <div className="message message-ai">
-                        <div className="message-avatar">🤖</div>
-                        <div className="message-content thinking">
-                            <div className="thinking-dot"></div>
-                            <div className="thinking-dot"></div>
-                            <div className="thinking-dot"></div>
-                        </div>
-                    </div>
-                )}
-                <div ref={messagesEndRef} />
-            </div>
+                );
+        }
+    };
 
-            {showScrollIndicator && !isAtBottom && (
-                <div
-                    className={`new-message-indicator ${!isAtBottom ? 'visible' : ''}`}
-                    onClick={() => scrollToBottom()}
-                >
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none">
-                        <path d="M18 15l-6 6-6-6" />
-                        <path d="M12 3v18" />
-                    </svg>
-                    New messages
-                </div>
-            )}
-
-            <div className="input-container">
-                <form onSubmit={handleSubmit} className="input-wrapper">
-                    <textarea
-                        ref={textareaRef}
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Ask me anything or use @ for files, # for commands..."
-                        className="message-input"
-                        onKeyDown={handleKeyDown}
-                    />
-                    <button
-                        type="submit"
-                        className="send-button"
-                        disabled={isLoading || !inputText.trim()}
-                    >
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                        </svg>
-                    </button>
-                </form>
-            </div>
-        </div>
-    );
+    return renderPage();
 };

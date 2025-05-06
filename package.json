@@ -1,7 +1,7 @@
 {
   "name": "kalai-agent",
   "displayName": "KalAI Agent",
-  "description": "Next-generation AI coding assistant powered by free, high-performance language models",
+  "description": "AI-powered coding assistant with context-aware suggestions and code analysis",
   "version": "0.1.0",
   "publisher": "kalculus",
   "engines": {
@@ -10,15 +10,25 @@
   "categories": [
     "Programming Languages",
     "Machine Learning",
+    "Snippets",
     "Other"
   ],
   "keywords": [
     "ai",
-    "code assistant",
+    "code-assistant",
     "copilot",
-    "code generation",
-    "machine learning"
+    "context-aware",
+    "productivity"
   ],
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Odeneho-Calculus/kalai-agent"
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -78,7 +88,7 @@
         },
         "kalai-agent.modelName": {
           "type": "string",
-          "default": "mistralai/mixtral-8x7b-instruct-v0.1",
+          "default": "qwen/qwen3-30b-a3b:free",
           "description": "AI model to use for code assistance"
         }
       }
