@@ -2,7 +2,7 @@
 
 ![Kalai Agent Banner](media/icon.png)
 
-Kalai Agent is a powerful VS Code extension that provides context-aware code assistance using advanced AI capabilities.
+Kalai Agent is an advanced AI-powered coding assistant that provides comprehensive project analysis, intelligent code suggestions, multi-step planning, and automated development tools for Visual Studio Code.
 
 ## Features
 
@@ -13,11 +13,13 @@ Kalai Agent is a powerful VS Code extension that provides context-aware code ass
 
 <!-- ![Context Analysis](media/docs/context-analysis.png) -->
 
-### 💡 Smart Code Assistance
-- **Code Generation**: Generate code based on natural language descriptions
-- **Code Explanations**: Get detailed explanations of complex code segments
-- **Refactoring Suggestions**: Receive suggestions for code improvements
-- **Bug Detection**: Identify potential issues and get fix suggestions
+### 💡 Advanced Development Tools
+- **Code Explanation**: Get detailed explanations of complex code segments
+- **Test Generation**: Automatically generate comprehensive unit tests
+- **Performance Optimization**: Identify and fix performance bottlenecks
+- **Security Analysis**: Find and fix security vulnerabilities
+- **Code Refactoring**: Intelligent code restructuring suggestions
+- **Documentation Generation**: Auto-generate API docs and comments
 
 ### 🔄 Interactive Features
 - **Chat Interface**: Natural conversation with the AI assistant
@@ -28,11 +30,13 @@ Kalai Agent is a powerful VS Code extension that provides context-aware code ass
 - **Command Palette Integration**: Quick access to all features
 - **Selection-Based Assistance**: Get help with selected code segments
 
-### 🛠 Development Tools
-- **Project Analysis**: Understand project structure and dependencies
-- **Documentation Help**: Generate and improve code documentation
-- **Best Practices**: Suggestions for following coding standards
-- **Testing Support**: Help with writing and improving tests
+### 🛠 Project Analysis & Insights
+- **Architecture Analysis**: Comprehensive project structure analysis
+- **Dependency Management**: Track and analyze project dependencies
+- **Code Quality Metrics**: Complexity analysis and quality scoring
+- **File Search & Navigation**: Advanced codebase search capabilities
+- **Multi-Step Task Planning**: Breaks down complex tasks into manageable steps
+- **Real-Time Tech Info**: Get up-to-date information about frameworks and libraries
 
 <!-- ![Code Editing](media/docs/code-editing.png) -->
 
@@ -61,6 +65,20 @@ Kalai Agent is a powerful VS Code extension that provides context-aware code ass
 
 ## Commands
 
+### Code Analysis Commands
+- `Kalai: Explain Code` - Get detailed explanations of selected code
+- `Kalai: Generate Tests` - Create comprehensive unit tests
+- `Kalai: Optimize Performance` - Find and fix performance issues
+- `Kalai: Find Security Issues` - Security vulnerability analysis
+- `Kalai: Refactor Code` - Intelligent code restructuring
+- `Kalai: Generate Documentation` - Auto-generate docs and comments
+
+### Project Commands
+- `Kalai: Analyze Project Architecture` - Comprehensive project analysis
+- `Kalai: Search Codebase` - Advanced search with AI insights
+
+### Information Commands
+- `Kalai: Get Latest Tech Info` - Current tech trends and updates
 - `Kalai: Start Chat` - Open the AI chat interface
 - `Kalai: Edit with AI` - Get AI assistance for selected code
 
@@ -85,11 +103,25 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## Release Notes
 
-### 1.0.0
-- Initial release
-- Core features implementation
+### 2.0.0 - Advanced AI Assistant
+- ✨ Multi-step task planning and execution
+- 🔍 Advanced project analysis and insights
+- 🛡️ Security vulnerability detection
+- 📚 Automatic documentation generation
+- 🎯 Intelligent code refactoring
+- 🌐 Real-time tech information
+- 📊 Code quality metrics and analysis
+- 🔧 Performance optimization tools
+
+### 1.0.5 - Enhanced Chat
+- Improved context awareness
+- Better code analysis
+- Bug fixes and performance improvements
+
+### 1.0.0 - Initial Release
+- Basic AI chat functionality
+- Code analysis and suggestions
 - Multi-language support
-- Interactive chat interface
 
 ## Support
 

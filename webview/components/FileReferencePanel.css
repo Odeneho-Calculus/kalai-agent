@@ -1,0 +1,352 @@
+.file-reference-panel {
+    background: var(--vscode-sideBar-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    max-height: 300px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--vscode-sideBarSectionHeader-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.panel-icon {
+    font-size: 14px;
+}
+
+.panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--vscode-sideBarSectionHeader-foreground);
+}
+
+.file-count {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.header-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.clear-all-btn {
+    background: transparent;
+    border: 1px solid var(--vscode-button-border);
+    color: var(--vscode-button-foreground);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.clear-all-btn:hover {
+    background: var(--vscode-button-hoverBackground);
+}
+
+.files-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.file-item {
+    margin-bottom: 4px;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    background: var(--vscode-input-background);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.file-item:hover {
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.file-header:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.file-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.file-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--vscode-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-path {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.language-tag {
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.expand-btn,
+.remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 3px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.expand-btn:hover,
+.remove-btn:hover {
+    background: var(--vscode-toolbar-hoverBackground);
+    opacity: 1;
+}
+
+.remove-btn:hover {
+    color: var(--vscode-errorForeground);
+}
+
+.file-content {
+    border-top: 1px solid var(--vscode-panel-border);
+    background: var(--vscode-editor-background);
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--vscode-sideBar-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.content-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.stat {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.content-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.action-btn {
+    background: transparent;
+    border: 1px solid var(--vscode-button-border);
+    color: var(--vscode-button-foreground);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: var(--vscode-button-hoverBackground);
+}
+
+.content-preview {
+    max-height: 200px;
+    overflow: auto;
+    padding: 12px;
+}
+
+.code-preview {
+    margin: 0;
+    font-family: var(--vscode-editor-font-family);
+    font-size: 12px;
+    line-height: 1.4;
+    background: transparent;
+    color: var(--vscode-editor-foreground);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
+}
+
+.empty-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+}
+
+.empty-text {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.empty-hint {
+    font-size: 11px;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .file-reference-panel {
+        max-height: 250px;
+    }
+
+    .panel-header {
+        padding: 6px 12px;
+    }
+
+    .file-header {
+        padding: 6px 8px;
+    }
+
+    .file-details {
+        gap: 2px;
+    }
+
+    .content-stats {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .content-actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .content-preview {
+        padding: 8px;
+        max-height: 150px;
+    }
+}
+
+/* Animation for expanding/collapsing */
+.file-content {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 300px;
+    }
+}
+
+/* Dark theme adjustments */
+.vscode-dark .file-item:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* High contrast theme */
+.vscode-high-contrast .file-item {
+    border-width: 2px;
+}
+
+.vscode-high-contrast .action-btn {
+    border-width: 2px;
+}
+
+/* Scrollbar styling */
+.files-list::-webkit-scrollbar,
+.content-preview::-webkit-scrollbar {
+    width: 6px;
+}
+
+.files-list::-webkit-scrollbar-track,
+.content-preview::-webkit-scrollbar-track {
+    background: var(--vscode-scrollbarSlider-background);
+}
+
+.files-list::-webkit-scrollbar-thumb,
+.content-preview::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbarSlider-background);
+    border-radius: 3px;
+}
+
+.files-list::-webkit-scrollbar-thumb:hover,
+.content-preview::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbarSlider-hoverBackground);
+}

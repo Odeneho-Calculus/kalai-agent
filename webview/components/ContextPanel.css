@@ -1,0 +1,441 @@
+.context-panel {
+    width: 350px;
+    background: var(--vscode-sideBar-background);
+    border-left: 1px solid var(--vscode-panel-border);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--vscode-sideBarSectionHeader-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panel-icon {
+    font-size: 16px;
+}
+
+.panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vscode-sideBarSectionHeader-foreground);
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+    background: var(--vscode-toolbar-hoverBackground);
+}
+
+.panel-tabs {
+    display: flex;
+    background: var(--vscode-sideBar-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    flex-shrink: 0;
+}
+
+.tab-button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    background: transparent;
+    border: none;
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-button:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.tab-button.active {
+    background: var(--vscode-tab-activeBackground);
+    border-bottom-color: var(--vscode-focusBorder);
+    color: var(--vscode-tab-activeForeground);
+}
+
+.tab-icon {
+    font-size: 16px;
+}
+
+.tab-label {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.context-section {
+    margin-bottom: 24px;
+}
+
+.context-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.context-section h4 {
+    margin: 16px 0 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+}
+
+/* Project Info */
+.project-info,
+.build-info,
+.git-info {
+    background: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.info-item,
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.info-item:last-child,
+.config-item:last-child {
+    margin-bottom: 0;
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--vscode-foreground);
+    flex-shrink: 0;
+    min-width: 80px;
+}
+
+.value {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    text-align: right;
+    word-break: break-word;
+}
+
+.language-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.language-tag {
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 2px 6px;
+    border-radius: 8px;
+    text-transform: uppercase;
+}
+
+.scripts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.script-item {
+    display: flex;
+    gap: 6px;
+    font-size: 11px;
+}
+
+.script-name {
+    font-weight: 500;
+    color: var(--vscode-foreground);
+    flex-shrink: 0;
+}
+
+.script-command {
+    color: var(--vscode-descriptionForeground);
+    font-family: var(--vscode-editor-font-family);
+    word-break: break-all;
+}
+
+/* Files Tree */
+.files-tree {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.file-tree-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.file-tree-item:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.file-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.file-name {
+    flex: 1;
+    color: var(--vscode-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-language {
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 2px 4px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.more-files {
+    padding: 8px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+}
+
+/* Dependencies */
+.dependencies-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.dependency-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.dependency-item:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.dep-name {
+    font-weight: 500;
+    color: var(--vscode-foreground);
+}
+
+.dep-version {
+    font-family: var(--vscode-editor-font-family);
+    color: var(--vscode-descriptionForeground);
+    font-size: 11px;
+}
+
+.package-managers {
+    margin-top: 16px;
+}
+
+.package-manager-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+
+/* Git Info */
+.no-git {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+    color: var(--vscode-descriptionForeground);
+    text-align: center;
+}
+
+.no-git .icon {
+    font-size: 24px;
+    opacity: 0.6;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    color: var(--vscode-descriptionForeground);
+}
+
+.loading-spinner {
+    font-size: 24px;
+    margin-bottom: 12px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* Panel Footer */
+.panel-footer {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--vscode-sideBar-background);
+    border-top: 1px solid var(--vscode-panel-border);
+    flex-shrink: 0;
+}
+
+.refresh-btn,
+.export-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--vscode-button-border);
+    color: var(--vscode-button-foreground);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.refresh-btn:hover,
+.export-btn:hover {
+    background: var(--vscode-button-hoverBackground);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .context-panel {
+        width: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .context-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .tab-button {
+        padding: 6px 2px;
+    }
+
+    .tab-label {
+        font-size: 10px;
+    }
+
+    .panel-content {
+        padding: 12px;
+    }
+}
+
+/* Dark theme adjustments */
+.vscode-dark .context-panel {
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* High contrast theme */
+.vscode-high-contrast .context-panel {
+    border-left-width: 2px;
+    border-left-color: var(--vscode-contrastBorder);
+}
+
+.vscode-high-contrast .tab-button.active {
+    border-bottom-width: 3px;
+}
+
+/* Scrollbar styling */
+.panel-content::-webkit-scrollbar,
+.files-tree::-webkit-scrollbar,
+.dependencies-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track,
+.files-tree::-webkit-scrollbar-track,
+.dependencies-list::-webkit-scrollbar-track {
+    background: var(--vscode-scrollbarSlider-background);
+}
+
+.panel-content::-webkit-scrollbar-thumb,
+.files-tree::-webkit-scrollbar-thumb,
+.dependencies-list::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbarSlider-background);
+    border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover,
+.files-tree::-webkit-scrollbar-thumb:hover,
+.dependencies-list::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbarSlider-hoverBackground);
+}

@@ -8,29 +8,30 @@ import { getNonce } from './getNonce';
  * @returns HTML content as a string
  */
 export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): string {
-  const scriptUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(extensionUri, 'dist', 'webview.js')
-  );
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'webview.js'));
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'dist', 'webview', 'webview.css'));
+    const nonce = getNonce();
 
-  const nonce = getNonce();
-
-  return `<!DOCTYPE html>
-  <html lang="en">
+    return `<!DOCTYPE html>
+    <html lang="en">
     <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="Content-Security-Policy" content="
-        default-src 'none';
-        style-src ${webview.cspSource} 'unsafe-inline';
-        script-src ${webview.cspSource} 'unsafe-inline';
-        img-src ${webview.cspSource} https:;
-        connect-src ${webview.cspSource} https:;
-      ">
-      <title>KalAI Agent Chat</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Security-Policy" content="
+            default-src 'none';
+            style-src ${webview.cspSource} 'unsafe-inline';
+            script-src 'nonce-${nonce}' ${webview.cspSource};
+            connect-src ${webview.cspSource} https://openrouter.ai/;
+            img-src ${webview.cspSource} https: data:;
+            frame-src 'none';
+            form-action 'self';
+        ">
+        <title>Kalai Agent Chat</title>
+        <link rel="stylesheet" href="${styleUri}">
     </head>
     <body>
-      <div id="root"></div>
-      <script nonce="${nonce}" src="${scriptUri}"></script>
+        <div id="root"></div>
+        <script nonce="${nonce}" src="${scriptUri}"></script>
     </body>
-  </html>`;
+    </html>`;
 }

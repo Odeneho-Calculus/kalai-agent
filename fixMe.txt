@@ -1,0 +1,57 @@
+Sending message: Explain this code
+webview.js:16 Posting message to extension: {type: 'sendMessage', data: {…}}data: {text: 'Explain this code', files: undefined, context: null}type: "sendMessage"[[Prototype]]: Object
+console.ts:137 [Extension Host] Received sendMessage: {type: 'sendMessage', data: {…}}data: {text: 'Explain this code', context: null}type: "sendMessage"[[Prototype]]: Object (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:172:27485))
+console.ts:137 [Extension Host] Processing message: Explain this code (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:172:27485))
+log.ts:460   ERR [Extension Host] AI Service error: Error: AI service timeout
+	at Timeout._onTimeout (c:\Users\kalculusGuy\Desktop\projectEra\extensions\kalai-agent\dist\extension.js:146:1645)
+	at listOnTimeout (node:internal/timers:581:17)
+	at process.processTimers (node:internal/timers:519:7)
+error @ log.ts:460
+error @ log.ts:565
+error @ logService.ts:51
+gws @ remoteConsoleUtil.ts:58
+$logExtensionHostMessage @ mainThreadConsole.ts:38
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+B @ event.ts:1208
+fire @ event.ts:1239
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:378
+console.ts:137 [Extension Host] AI Service error: Error: AI service timeout
+	at Timeout._onTimeout (c:\Users\kalculusGuy\Desktop\projectEra\extensions\kalai-agent\dist\extension.js:146:1645)
+	at listOnTimeout (node:internal/timers:581:17)
+	at process.processTimers (node:internal/timers:519:7) (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:172:27485))
+dws @ console.ts:137
+$logExtensionHostMessage @ mainThreadConsole.ts:39
+S @ rpcProtocol.ts:458
+Q @ rpcProtocol.ts:443
+M @ rpcProtocol.ts:373
+L @ rpcProtocol.ts:299
+(anonymous) @ rpcProtocol.ts:161
+B @ event.ts:1208
+fire @ event.ts:1239
+fire @ ipc.net.ts:652
+l.onmessage @ localProcessExtensionHost.ts:378
+console.ts:137 [Extension Host] Sending response: ## 📚 Code Explanation
+
+I can explain:
+- **Functions and Classes** - How they work and their purpose
+- **Algorithms** - Step-by-step logic breakdown
+- **Design Patterns** - Architecture and best practices
+- **Framework Features** - Library-specific functionality
+
+### Analysis Available:
+- Code complexity metrics
+- Dependency relationships
+- Performance characteristics
+- Security considerations
+
+### Learning Resources:
+- Interactive code examples
+- Best practice recommendations
+- Common pitfalls to avoid
+
+Share the specific code or concept you'd like explained, and I'll provide detailed insights! (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:172:27485))

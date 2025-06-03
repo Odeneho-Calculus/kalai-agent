@@ -8,7 +8,7 @@ module.exports = {
         filename: 'webview.js'
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
         modules: ['node_modules']
     },
     module: {
@@ -17,7 +17,12 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
+            },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
             }
         ]
-    }
+    },
+    devtool: 'source-map'
 };
