@@ -169,6 +169,12 @@
         "icon": "$(info)"
       },
       {
+        "command": "kalai-agent.showPerformanceReport",
+        "title": "Kalai: Show Performance Report",
+        "category": "Kalai Agent",
+        "icon": "$(graph)"
+      },
+      {
         "command": "kalai-agent.generateMultiFileCode",
         "title": "Kalai: Generate Multi-File Code",
         "category": "Kalai Agent",
@@ -488,6 +494,9 @@
           "command": "kalai-agent.showModeDetails"
         },
         {
+          "command": "kalai-agent.showPerformanceReport"
+        },
+        {
           "command": "kalai-agent.generateMultiFileCode"
         },
         {
@@ -609,10 +618,11 @@
         },
         "kalai-agent.modelName": {
           "type": "string",
-          "default": "qwen/qwen-2.5-7b-instruct:free",
+          "default": "moonshotai/kimi-k2:free",
           "description": "AI model to use for code generation and analysis",
           "enum": [
-            "qwen/qwen-2.5-7b-instruct:free",
+            "moonshotai/kimi-k2:free",
+            "meta-llama/llama-3.3-70b-instruct:free",
             "gpt-4-turbo",
             "gpt-4",
             "gpt-3.5-turbo",
@@ -628,8 +638,10 @@
         },
         "kalai-agent.maxTokens": {
           "type": "number",
-          "default": 2048,
-          "description": "Maximum tokens for AI responses"
+          "default": 1024,
+          "minimum": 256,
+          "maximum": 4096,
+          "description": "Maximum tokens for AI responses (lower values reduce token limit errors)"
         },
         "kalai-agent.temperature": {
           "type": "number",

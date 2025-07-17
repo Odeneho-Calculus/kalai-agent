@@ -598,11 +598,30 @@ export class CodeContextManager {
 
     private async updateGitInfo() {
         try {
-            const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-            if (!gitExtension) return;
+            const gitExtension = vscode.extensions.getExtension('vscode.git');
+            if (!gitExtension) {
+                console.debug('Git extension not found');
+                return;
+            }
 
-            const api = gitExtension.getAPI(1);
-            if (api.repositories.length > 0) {
+            // Check if the extension is activated
+            if (!gitExtension.isActive) {
+                try {
+                    await gitExtension.activate();
+                } catch (activationError) {
+                    console.debug('Could not activate git extension:', activationError);
+                    return;
+                }
+            }
+
+            const gitApi = gitExtension.exports;
+            if (!gitApi) {
+                console.debug('Git API not available');
+                return;
+            }
+
+            const api = gitApi.getAPI(1);
+            if (api && api.repositories.length > 0) {
                 const repo = api.repositories[0];
 
                 this.currentContext.gitInfo = {
@@ -613,7 +632,8 @@ export class CodeContextManager {
                 };
             }
         } catch (error) {
-            console.warn('Error getting git info:', error);
+            console.debug('Error getting git info:', error);
+            // Don't show this as a warning since git might not be available
         }
     }
 
@@ -675,28 +695,38 @@ export class CodeContextManager {
     private async updateProjectDependencies(context?: ProjectContext) {
         try {
             const packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**');
-            if (packageJsonFiles.length > 0) {
-                const content = await vscode.workspace.fs.readFile(packageJsonFiles[0]);
-                const contentString = content.toString().trim();
 
-                // Check if content is empty or invalid
-                if (!contentString || contentString.length === 0) {
-                    console.warn('Package.json file is empty');
-                    return;
+            // Try to find a valid package.json file
+            for (const packageJsonFile of packageJsonFiles) {
+                try {
+                    const content = await vscode.workspace.fs.readFile(packageJsonFile);
+                    const contentString = content.toString().trim();
+
+                    // Check if content is empty or invalid
+                    if (!contentString || contentString.length === 0) {
+                        console.debug(`Skipping empty package.json file: ${packageJsonFile.fsPath}`);
+                        continue;
+                    }
+
+                    // Validate JSON structure before parsing
+                    if (!contentString.startsWith('{') || !contentString.endsWith('}')) {
+                        console.debug(`Skipping invalid package.json file: ${packageJsonFile.fsPath}`);
+                        continue;
+                    }
+
+                    const packageJson = JSON.parse(contentString);
+                    const targetContext = context || this.currentContext;
+                    targetContext.dependencies = {
+                        ...packageJson.dependencies,
+                        ...packageJson.devDependencies
+                    };
+
+                    // Successfully processed a package.json file, break the loop
+                    break;
+                } catch (fileError) {
+                    console.debug(`Error reading package.json file ${packageJsonFile.fsPath}:`, fileError);
+                    continue;
                 }
-
-                // Validate JSON structure before parsing
-                if (!contentString.startsWith('{') || !contentString.endsWith('}')) {
-                    console.warn('Package.json file appears to be corrupted or incomplete');
-                    return;
-                }
-
-                const packageJson = JSON.parse(contentString);
-                const targetContext = context || this.currentContext;
-                targetContext.dependencies = {
-                    ...packageJson.dependencies,
-                    ...packageJson.devDependencies
-                };
             }
         } catch (error) {
             console.warn('Failed to read package.json:', error);

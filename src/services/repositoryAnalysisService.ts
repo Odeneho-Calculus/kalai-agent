@@ -215,16 +215,27 @@ export class RepositoryAnalysisService {
         const files: string[] = [];
 
         const pattern = `**/*{${this.SUPPORTED_EXTENSIONS.join(',')}}`;
-        const exclude = '**/node_modules/**';
+        const exclude = '{**/node_modules/**,**/.git/**,**/dist/**,**/build/**,**/coverage/**,**/.vscode/**,**/.idea/**}';
 
         const foundFiles = await vscode.workspace.findFiles(pattern, exclude);
 
         for (const file of foundFiles) {
-            const stat = await vscode.workspace.fs.stat(file);
+            // Additional filtering for problematic files
+            if (this.shouldSkipFile(file.fsPath)) {
+                continue;
+            }
 
-            // Skip files that are too large
-            if (stat.size <= this.MAX_FILE_SIZE) {
-                files.push(file.fsPath);
+            try {
+                const stat = await vscode.workspace.fs.stat(file);
+
+                // Skip files that are too large
+                if (stat.size <= this.MAX_FILE_SIZE) {
+                    files.push(file.fsPath);
+                }
+            } catch (error) {
+                // Skip files that can't be accessed
+                console.warn(`Skipping file due to access error: ${file.fsPath}`, error);
+                continue;
             }
         }
 
@@ -232,11 +243,53 @@ export class RepositoryAnalysisService {
     }
 
     /**
+     * Check if a file should be skipped during analysis
+     */
+    private shouldSkipFile(filePath: string): boolean {
+        const skipPatterns = [
+            /\.git[\/\\]/,
+            /\.lock$/,
+            /\.tmp$/,
+            /\.temp$/,
+            /\.cache$/,
+            /\.log$/,
+            /node_modules[\/\\]/,
+            /dist[\/\\]/,
+            /build[\/\\]/,
+            /coverage[\/\\]/,
+            /\.vscode[\/\\]/,
+            /\.idea[\/\\]/,
+            /\.DS_Store$/,
+            /Thumbs\.db$/,
+            /\.min\./,
+            /\.bundle\./,
+            /\.chunk\./
+        ];
+
+        return skipPatterns.some(pattern => pattern.test(filePath));
+    }
+
+    /**
      * Analyze individual file and extract code elements
      */
     public async analyzeFile(filePath: string): Promise<FileIndexEntry | null> {
         try {
+            // Skip problematic files
+            if (this.shouldSkipFile(filePath)) {
+                console.log(`Skipping file due to filter: ${filePath}`);
+                return null;
+            }
+
             const uri = vscode.Uri.file(filePath);
+
+            // Check if file exists and is accessible
+            try {
+                await vscode.workspace.fs.stat(uri);
+            } catch (statError) {
+                console.warn(`File not accessible, skipping: ${filePath}`, statError);
+                return null;
+            }
+
             const document = await vscode.workspace.openTextDocument(uri);
             const content = document.getText();
             const stat = await vscode.workspace.fs.stat(uri);

@@ -409,11 +409,12 @@ export class PluginService {
                     url: this.pluginDirectory,
                     priority: 1
                 },
-                {
-                    type: 'remote',
-                    url: 'https://kalai-plugins.example.com',
-                    priority: 2
-                }
+                // Remote plugin discovery disabled for now
+                // {
+                //     type: 'remote',
+                //     url: 'https://kalai-plugins.example.com',
+                //     priority: 2
+                // }
             ],
             cache: {
                 plugins: new Map(),

@@ -247,57 +247,57 @@ export class ModelService {
      */
     private initializeModels(): void {
         // Add OpenRouter models
-        this.models.set('qwen-2.5-7b', {
-            id: 'qwen-2.5-7b',
-            name: 'Qwen 2.5 7B Instruct',
-            description: 'High-performance coding model with excellent reasoning',
+        this.models.set('llama-3.3-70b', {
+            id: 'llama-3.3-70b',
+            name: 'Llama 3.3 70B Instruct',
+            description: 'Advanced open-source model with exceptional reasoning and code generation capabilities',
             capabilities: [
                 {
                     type: 'code-generation',
                     level: 'expert',
-                    specialization: ['javascript', 'typescript', 'python', 'java'],
-                    supportedLanguages: ['en', 'zh'],
-                    maxTokens: 4096,
-                    contextWindow: 32768
+                    specialization: ['javascript', 'typescript', 'python', 'java', 'cpp', 'rust'],
+                    supportedLanguages: ['en', 'es', 'fr', 'de', 'it'],
+                    maxTokens: 8192,
+                    contextWindow: 131072
                 },
                 {
                     type: 'code-analysis',
-                    level: 'advanced',
-                    specialization: ['debugging', 'refactoring', 'optimization'],
+                    level: 'expert',
+                    specialization: ['debugging', 'refactoring', 'optimization', 'security-analysis'],
                     supportedLanguages: ['en'],
-                    maxTokens: 4096,
-                    contextWindow: 32768
+                    maxTokens: 8192,
+                    contextWindow: 131072
                 }
             ],
             performance: {
-                speed: 'fast',
-                accuracy: 0.92,
-                consistency: 0.89,
-                latency: 800,
-                throughput: 150,
-                reliability: 0.95
+                speed: 'medium',
+                accuracy: 0.95,
+                consistency: 0.93,
+                latency: 1200,
+                throughput: 120,
+                reliability: 0.97
             },
             cost: {
-                inputCost: 0.0001,
-                outputCost: 0.0002,
-                tier: 'premium',
+                inputCost: 0.0000,
+                outputCost: 0.0000,
+                tier: 'free',
                 rateLimits: [
-                    { type: 'requests', limit: 1000, window: 3600, burst: 10 },
-                    { type: 'tokens', limit: 100000, window: 3600, burst: 1000 }
+                    { type: 'requests', limit: 200, window: 3600, burst: 5 },
+                    { type: 'tokens', limit: 50000, window: 3600, burst: 2000 }
                 ]
             },
             availability: {
                 status: 'available',
-                regions: ['us-east-1', 'us-west-2', 'eu-west-1'],
-                uptime: 0.999,
+                regions: ['global'],
+                uptime: 0.995,
                 lastChecked: new Date()
             },
             constraints: {
-                maxConcurrentRequests: 5,
-                cooldownPeriod: 1000,
+                maxConcurrentRequests: 3,
+                cooldownPeriod: 2000,
                 contentFiltering: true,
                 dataRetention: 0,
-                compliance: ['GDPR', 'SOC2']
+                compliance: ['GDPR', 'SOC2', 'CCPA']
             }
         });
 
@@ -460,7 +460,7 @@ export class ModelService {
                 accuracy: 0.4,
                 availability: 0.1
             },
-            fallbackModels: ['qwen-2.5-7b', 'claude-3-haiku', 'local-codellama'],
+            fallbackModels: ['llama-3.3-70b', 'claude-3-haiku', 'local-codellama'],
             retryPolicy: {
                 maxRetries: 3,
                 backoffMultiplier: 2,

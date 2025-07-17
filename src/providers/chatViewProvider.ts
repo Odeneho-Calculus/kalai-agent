@@ -607,6 +607,33 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private generateIntelligentFallback(userMessage: string, aiContext: any): string {
     const message = userMessage.toLowerCase();
 
+    // Check for specific error types
+    if (message.includes('rate limit') || message.includes('429')) {
+      return `⚠️ **Rate Limit Reached**
+
+The AI service is currently rate-limited. This is a temporary issue that will resolve automatically.
+
+**What you can do:**
+- Wait a few minutes and try again
+- The extension will automatically retry with exponential backoff
+- Consider using a different model if available in settings
+
+**Current Status:** The extension is working but the AI model has usage limits.`;
+    }
+
+    if (message.includes('token') || message.includes('400')) {
+      return `⚠️ **Token Limit Exceeded**
+
+Your request contains too much text for the AI model to process at once.
+
+**What you can do:**
+- Try breaking your request into smaller parts
+- The extension will automatically truncate long messages
+- Consider asking about specific files rather than the entire codebase
+
+**Current Status:** The extension is working but needs shorter inputs.`;
+    }
+
     // Detect code editing requests
     if (message.includes('fix') || message.includes('error') || message.includes('bug')) {
       return this.generateFixSuggestion(userMessage, aiContext);

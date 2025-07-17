@@ -8,7 +8,7 @@ interface SettingsPageProps {
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ vscode, onClose }) => {
     const [settings, setSettings] = React.useState({
-        modelName: 'qwen/qwen3-30b-a3b:free',
+        modelName: 'meta-llama/llama-3.3-70b-instruct:free',
         temperature: 0.7,
         maxTokens: 4000
     });
@@ -94,37 +94,44 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ vscode, onClose }) =
 
             <div className="settings-form">
                 <div className="form-group">
-                    <label>Model</label>
+                    <label htmlFor="model-select">Model</label>
                     <select
+                        id="model-select"
                         value={settings.modelName}
                         onChange={(e) => setSettings({ ...settings, modelName: e.target.value })}
+                        aria-label="Select AI model"
                     >
-                        <option value="qwen/qwen3-30b-a3b:free">Qwen3 30B (Free)</option>
+                        <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
                         <option value="mistralai/mixtral-8x7b-instruct">Mixtral 8x7B</option>
                     </select>
                 </div>
 
                 <div className="form-group">
-                    <label>Temperature (0.1 - 1.0)</label>
+                    <label htmlFor="temperature-range">Temperature (0.1 - 1.0)</label>
                     <input
+                        id="temperature-range"
                         type="range"
                         min="0.1"
                         max="1.0"
                         step="0.1"
                         value={settings.temperature}
                         onChange={(e) => setSettings({ ...settings, temperature: parseFloat(e.target.value) })}
+                        aria-label="Temperature setting for AI model response randomness"
+                        aria-describedby="temperature-value"
                     />
-                    <span>{settings.temperature}</span>
+                    <span id="temperature-value" aria-live="polite">{settings.temperature}</span>
                 </div>
 
                 <div className="form-group">
-                    <label>Max Tokens</label>
+                    <label htmlFor="max-tokens-input">Max Tokens</label>
                     <input
+                        id="max-tokens-input"
                         type="number"
                         value={settings.maxTokens}
                         onChange={(e) => setSettings({ ...settings, maxTokens: parseInt(e.target.value) })}
                         min="100"
                         max="8000"
+                        aria-label="Maximum number of tokens for AI model response"
                     />
                 </div>
 

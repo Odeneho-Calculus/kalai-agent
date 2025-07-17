@@ -22,8 +22,19 @@ import { ModelService } from './services/modelService';
 import { CollaborationService } from './services/collaborationService';
 import { PluginService } from './services/pluginService';
 import { IntegrationService } from './services/integrationService';
+import { PerformanceMonitor } from './utils/performanceMonitor';
 
 export function activate(context: vscode.ExtensionContext) {
+  // Suppress experimental and deprecation warnings
+  process.removeAllListeners('warning');
+  process.on('warning', (warning) => {
+    if (!warning.message.includes('SQLite is an experimental feature') &&
+      !warning.message.includes('punycode') &&
+      !warning.message.includes('deprecated')) {
+      console.warn(warning);
+    }
+  });
+
   console.log('🚀 Kalai Agent with Repo Grokking™ is now active!');
 
   // Initialize enhanced services
@@ -97,13 +108,18 @@ export function activate(context: vscode.ExtensionContext) {
       await progressIndicator.startProgress('Initializing Kalai Agent', steps, vscode.ProgressLocation.Window);
 
       progressIndicator.nextStep(); // Discovery
-      await enhancedAIService.initializeRepoGrokking();
+
+      // Skip heavy initialization during startup - do it lazily when needed
+      console.log('Skipping heavy repository analysis during startup...');
+
+      // Just do a quick setup
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       progressIndicator.nextStep(); // Analysis
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
+      await new Promise(resolve => setTimeout(resolve, 50)); // Very quick
 
       progressIndicator.nextStep(); // Indexing
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
+      await new Promise(resolve => setTimeout(resolve, 50)); // Very quick
 
       progressIndicator.nextStep(); // Finalization
       statusBarManager.updateStatus();
@@ -120,8 +136,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  // Start initialization
-  initializeWithProgress();
+  // Start initialization in background (non-blocking)
+  initializeWithProgress().catch(error => {
+    console.error('Background initialization failed:', error);
+  });
 
   // Register all commands
   const commands = [
@@ -202,6 +220,16 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.commands.registerCommand('kalai-agent.showModeDetails', async () => {
       await modeSelector.showModeDetails();
+    }),
+
+    vscode.commands.registerCommand('kalai-agent.showPerformanceReport', () => {
+      try {
+        const monitor = PerformanceMonitor.getInstance();
+        monitor.showPerformanceReport();
+      } catch (error) {
+        console.error('Error showing performance report:', error);
+        vscode.window.showErrorMessage('Failed to show performance report');
+      }
     }),
 
     // Phase 3 commands - Multi-File Operations
@@ -525,19 +553,7 @@ ${results.failureDetails.length > 0 ? `\nFailures:\n${results.failureDetails.map
       }
     }),
 
-    vscode.commands.registerCommand('kalai-agent.showPerformanceReport', async () => {
-      const status = performanceService.getPerformanceStatus();
-      const message = `Performance Status: ${status.status.toUpperCase()}
-Active Alerts: ${status.activeAlerts.length}
-Uptime: ${Math.round(status.uptime / 1000)}s
 
-${status.metrics ? `Current Metrics:
-- Memory: ${Math.round(status.metrics.memoryMetrics.heapUsed / 1024 / 1024)}MB
-- CPU: ${status.metrics.cpuMetrics.cpuUsage.toFixed(1)}%
-- Response Time: ${status.metrics.responseTimeMetrics.averageResponseTime.toFixed(0)}ms` : ''}`;
-
-      vscode.window.showInformationMessage(message, { modal: true });
-    }),
 
     vscode.commands.registerCommand('kalai-agent.generatePerformanceReport', async () => {
       const startTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours

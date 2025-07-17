@@ -4,6 +4,7 @@ import { AIRequestContext } from '../types/aiTypes';
 import { RepositoryAnalysisService, CodeElement, RepositoryIndex } from './repositoryAnalysisService';
 import { TaskOrchestrationService, TaskDefinition, AgenticTask, TaskContext } from './taskOrchestrationService';
 import { WebSearchService } from './webSearchService';
+import { PerformanceMonitor, withPerformanceTracking } from '../utils/performanceMonitor';
 
 // Secure configuration import with fallback
 let SECURE_CONFIG: any = null;
@@ -127,12 +128,25 @@ export class AIService {
   private maxTokens!: number;
   private temperature!: number;
   private readonly maxRetries: number = 3;
+  private readonly fallbackModels: string[] = [
+    'moonshotai/kimi-k2:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'microsoft/phi-3-mini-128k-instruct:free',
+    'google/gemma-2-9b-it:free'
+  ];
 
   private conversationHistory: EnhancedConversationContext;
   private repositoryAnalysisService: RepositoryAnalysisService | null = null;
   private taskOrchestrationService: TaskOrchestrationService | null = null;
   private webSearchService: WebSearchService | null = null;
   private projectAnalysisCache: Map<string, any> = new Map();
+
+  // Rate limiting
+  private lastRequestTime: number = 0;
+  private minRequestInterval: number = 1000; // Minimum 1 second between requests
+  private requestQueue: Array<{ resolve: Function, reject: Function, messages: any[] }> = [];
+  private isProcessingQueue: boolean = false;
 
   constructor(
     repositoryAnalysisService?: RepositoryAnalysisService,
@@ -163,9 +177,9 @@ export class AIService {
 
     this.MODEL_NAME = config.get<string>('modelName') ||
       (SECURE_CONFIG?.defaultModelName) ||
-      'qwen/qwen-2.5-7b-instruct:free';
+      'moonshotai/kimi-k2:free';
 
-    this.maxTokens = config.get<number>('maxTokens') || 2048;
+    this.maxTokens = config.get<number>('maxTokens') || 1024;
     this.temperature = config.get<number>('temperature') || 0.7;
 
     // Validate API key availability
@@ -336,7 +350,7 @@ export class AIService {
 
     // Generate enhanced response with search results
     const enhancedPrompt = this.buildWebSearchPrompt(message, searchResults, context);
-    const response = await this.callAIModel(enhancedPrompt);
+    const response = await this.callAIModelWithRateLimit(enhancedPrompt);
 
     return response;
   }
@@ -358,7 +372,7 @@ export class AIService {
     }
 
     const messages = this.buildConversationMessages(systemPrompt, userPrompt);
-    return await this.callAIModel(messages);
+    return await this.callAIModelWithRateLimit(messages);
   }
 
   private generateSessionId(): string {
@@ -882,7 +896,7 @@ Format your response as a structured plan with numbered steps.
       { role: 'user', content: planningPrompt }
     ];
 
-    const planResponse = await this.callAIModel(messages);
+    const planResponse = await this.callAIModelWithRateLimit(messages);
 
     // Store the task and plan using TaskOrchestrationService
     if (this.taskOrchestrationService) {
@@ -1126,7 +1140,7 @@ Guidelines:
    * Send message to AI service
    */
   public async sendMessage(message: string, context?: any): Promise<string> {
-    return this.processMessage(message, context);
+    return withPerformanceTracking('AI_SendMessage', () => this.processMessage(message, context));
   }
 
   public getCapabilities(): AICapabilities {
@@ -1163,7 +1177,31 @@ Guidelines:
 
   public async initializeRepoGrokking(): Promise<void> {
     if (this.repositoryAnalysisService) {
-      await this.repositoryAnalysisService.initializeRepository();
+      try {
+        // Much shorter timeout to prevent hanging
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Repository initialization timeout')), 5000); // 5 seconds only
+        });
+
+        // Make initialization lightweight - just basic setup
+        const initPromise = this.lightweightRepoInit();
+
+        await Promise.race([initPromise, timeoutPromise]);
+        console.log('Repository analysis initialized successfully');
+      } catch (error) {
+        console.warn('Repository initialization failed or timed out:', error);
+        // Continue without repository analysis
+      }
+    }
+  }
+
+  private async lightweightRepoInit(): Promise<void> {
+    // Lightweight initialization - just set up basic structure
+    // Don't do heavy file scanning or analysis during startup
+    if (this.repositoryAnalysisService) {
+      // Just initialize the basic structure without heavy operations
+      console.log('Setting up lightweight repository context...');
+      // Skip the heavy initializeRepository call for now
     }
   }
 
@@ -1178,7 +1216,7 @@ Guidelines:
       { role: 'user', content: prompt }
     ];
 
-    return this.callAIModel(messages);
+    return this.callAIModelWithRateLimit(messages);
   }
 
   private createSystemPrompt(context?: AIRequestContext): string {
@@ -1258,10 +1296,76 @@ Consider the current project context and dependencies. Respond only with the mod
     }
   }
 
+  /**
+   * Rate-limited wrapper for AI model calls
+   */
+  private async callAIModelWithRateLimit(messages: any[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.requestQueue.push({ resolve, reject, messages });
+      this.processRequestQueue();
+    });
+  }
+
+  /**
+   * Process the request queue with rate limiting
+   */
+  private async processRequestQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.requestQueue.length === 0) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
+
+    while (this.requestQueue.length > 0) {
+      const request = this.requestQueue.shift()!;
+
+      // Ensure minimum interval between requests
+      const now = Date.now();
+      const timeSinceLastRequest = now - this.lastRequestTime;
+
+      if (timeSinceLastRequest < this.minRequestInterval) {
+        const delay = this.minRequestInterval - timeSinceLastRequest;
+        console.log(`Rate limiting: waiting ${delay}ms before next request`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      try {
+        this.lastRequestTime = Date.now();
+        const result = await this.callAIModel(request.messages);
+        request.resolve(result);
+      } catch (error) {
+        request.reject(error);
+      }
+    }
+
+    this.isProcessingQueue = false;
+  }
+
   private async callAIModel(messages: any[], retryCount = 0): Promise<string> {
     try {
       if (!this.API_KEY) {
         throw new Error('API key is not configured. Please check your settings.');
+      }
+
+      // Calculate token usage and adjust max_tokens dynamically
+      const estimatedInputTokens = this.estimateTokenCount(messages);
+      const modelMaxTokens = this.getModelMaxTokens();
+      const adjustedMaxTokens = Math.min(
+        this.maxTokens,
+        Math.max(512, modelMaxTokens - estimatedInputTokens - 100) // Leave 100 token buffer
+      );
+
+      console.log('Token management:', {
+        estimatedInputTokens,
+        modelMaxTokens,
+        requestedMaxTokens: this.maxTokens,
+        adjustedMaxTokens
+      });
+
+      // If input tokens are too high, truncate messages
+      if (estimatedInputTokens > modelMaxTokens - 512) {
+        messages = this.truncateMessages(messages, modelMaxTokens - 512);
+        console.log('Messages truncated due to token limit');
       }
 
       const headers = {
@@ -1277,7 +1381,7 @@ Consider the current project context and dependencies. Respond only with the mod
         model: this.MODEL_NAME,
         messages: messages.map(m => ({ role: m.role, content: m.content.substring(0, 100) + '...' })),
         temperature: this.temperature,
-        max_tokens: this.maxTokens,
+        max_tokens: adjustedMaxTokens,
         top_p: 0.95
       });
 
@@ -1287,7 +1391,7 @@ Consider the current project context and dependencies. Respond only with the mod
           model: this.MODEL_NAME,
           messages,
           temperature: this.temperature,
-          max_tokens: this.maxTokens,
+          max_tokens: adjustedMaxTokens,
           top_p: 0.95
         },
         {
@@ -1298,27 +1402,99 @@ Consider the current project context and dependencies. Respond only with the mod
       );
 
       console.log('AI response status:', response.status);
+      console.log('AI response headers:', response.headers);
+      console.log('AI response data (full):', JSON.stringify(response.data, null, 2));
+
+      // Log the structure we're checking
+      console.log('Response data structure check:', {
+        hasData: !!response.data,
+        hasChoices: !!response.data?.choices,
+        choicesLength: response.data?.choices?.length,
+        hasFirstChoice: !!response.data?.choices?.[0],
+        hasMessage: !!response.data?.choices?.[0]?.message,
+        hasContent: !!response.data?.choices?.[0]?.message?.content,
+        contentType: typeof response.data?.choices?.[0]?.message?.content,
+        contentValue: response.data?.choices?.[0]?.message?.content
+      });
 
       // Handle specific response status codes
+      if (response.status === 400) {
+        const errorData = response.data as any;
+        if (errorData?.error?.message?.includes('tokens')) {
+          console.log('Token limit error detected, attempting to reduce token usage');
+          // Reduce max tokens and retry
+          if (retryCount < this.maxRetries) {
+            const currentModelMaxTokens = this.getModelMaxTokens();
+            const reducedMessages = this.truncateMessages(messages, Math.floor(currentModelMaxTokens * 0.6));
+            return this.callAIModel(reducedMessages, retryCount + 1);
+          }
+        }
+        throw new Error(`API request error: ${errorData?.error?.message || 'Bad request'}`);
+      }
+
       if (response.status === 401 || response.status === 403) {
         throw new Error('API authentication failed - please verify your API key and permissions');
       }
 
+      if (response.status === 404) {
+        console.error('Model not found error. Current model:', this.MODEL_NAME);
+        console.error('API Endpoint:', this.API_ENDPOINT);
+        throw new Error(`Model '${this.MODEL_NAME}' not found. Please check if the model is available on OpenRouter.`);
+      }
+
       if (response.status === 429) {
+        const errorData = response.data as any;
+        const rateLimitReset = errorData?.error?.metadata?.headers?.['X-RateLimit-Reset'];
+
         if (retryCount < this.maxRetries) {
-          // Exponential backoff
-          const delay = Math.pow(2, retryCount) * 1000;
+          // Calculate delay based on rate limit reset time or use exponential backoff
+          let delay = Math.pow(2, retryCount) * 1000;
+
+          if (rateLimitReset) {
+            const resetTime = parseInt(rateLimitReset);
+            const currentTime = Date.now();
+            const timeUntilReset = resetTime - currentTime;
+
+            if (timeUntilReset > 0 && timeUntilReset < 300000) { // Max 5 minutes
+              delay = Math.min(timeUntilReset + 1000, 60000); // Add 1 second buffer, max 1 minute
+            }
+          }
+
+          console.log(`Rate limit hit, waiting ${delay}ms before retry (${retryCount + 1}/${this.maxRetries})`);
           await new Promise(resolve => setTimeout(resolve, delay));
           return this.callAIModel(messages, retryCount + 1);
         }
         throw new Error('Rate limit exceeded. Please try again later.');
       }
 
-      if (!response.data?.choices?.[0]?.message?.content) {
-        throw new Error('Invalid response format from AI model');
+      // Check for different response formats safely
+      if (response.data?.choices?.[0]?.message?.content) {
+        return response.data.choices[0].message.content;
+      } else if (
+        response.data?.choices?.[0] &&
+        typeof (response.data.choices[0] as any).text === 'string'
+      ) {
+        // Some APIs return text instead of message.content
+        console.log('Using text field instead of message.content');
+        return (response.data.choices[0] as any).text;
+      } else if (
+        response.data &&
+        typeof (response.data as any).content === 'string'
+      ) {
+        // Some APIs return content directly
+        console.log('Using direct content field');
+        return (response.data as any).content;
+      } else if (
+        response.data &&
+        typeof (response.data as any).response === 'string'
+      ) {
+        // Some APIs return response field
+        console.log('Using response field');
+        return (response.data as any).response;
+      } else {
+        console.error('No valid content found in response. Available fields:', Object.keys(response.data || {}));
+        throw new Error(`Invalid response format from AI model. Status: ${response.status}, Available fields: ${Object.keys(response.data || {}).join(', ')}`);
       }
-
-      return response.data.choices[0].message.content;
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -1344,11 +1520,38 @@ Consider the current project context and dependencies. Respond only with the mod
         }
 
         // Handle specific error cases
-        if (status === 401) {
+        if (status === 400) {
+          const errorMessage = data?.error?.message || 'Bad request';
+          if (errorMessage.includes('tokens') && retryCount < this.maxRetries) {
+            console.log('Token limit error in catch block, attempting to reduce token usage');
+            const currentModelMaxTokens = this.getModelMaxTokens();
+            const reducedMessages = this.truncateMessages(messages, Math.floor(currentModelMaxTokens * 0.5));
+            return this.callAIModel(reducedMessages, retryCount + 1);
+          }
+          throw new Error(`API request error: ${errorMessage}`);
+        } else if (status === 401) {
           throw new Error('API authentication failed - please verify your API key');
         } else if (status === 403) {
           throw new Error('API access forbidden - please check your account permissions');
         } else if (status === 429) {
+          if (retryCount < this.maxRetries) {
+            const rateLimitReset = data?.error?.metadata?.headers?.['X-RateLimit-Reset'];
+            let delay = Math.pow(2, retryCount) * 1000;
+
+            if (rateLimitReset) {
+              const resetTime = parseInt(rateLimitReset);
+              const currentTime = Date.now();
+              const timeUntilReset = resetTime - currentTime;
+
+              if (timeUntilReset > 0 && timeUntilReset < 300000) { // Max 5 minutes
+                delay = Math.min(timeUntilReset + 1000, 60000); // Add 1 second buffer, max 1 minute
+              }
+            }
+
+            console.log(`Rate limit error in catch block, waiting ${delay}ms before retry (${retryCount + 1}/${this.maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return this.callAIModel(messages, retryCount + 1);
+          }
           throw new Error('Rate limit exceeded - please try again later');
         } else if (status === 404) {
           throw new Error('Model not found - please check the model name configuration');
@@ -1359,5 +1562,90 @@ Consider the current project context and dependencies. Respond only with the mod
       console.error('Unexpected error in AI service:', error);
       throw error;
     }
+  }
+
+  /**
+   * Estimate token count for messages (rough approximation)
+   */
+  private estimateTokenCount(messages: any[]): number {
+    let totalTokens = 0;
+    for (const message of messages) {
+      // Rough estimation: 1 token ≈ 4 characters for English text
+      totalTokens += Math.ceil(message.content.length / 4);
+      // Add overhead for role and structure
+      totalTokens += 10;
+    }
+    return totalTokens;
+  }
+
+  /**
+   * Get maximum token limit for the current model
+   */
+  private getModelMaxTokens(): number {
+    const modelLimits: { [key: string]: number } = {
+      'meta-llama/llama-3.3-70b-instruct:free': 8192,
+      'meta-llama/llama-3.1-70b-instruct:free': 8192,
+      'meta-llama/llama-3.1-8b-instruct:free': 8192,
+      'gpt-3.5-turbo': 4096,
+      'gpt-4': 8192,
+      'gpt-4-turbo': 128000,
+      'claude-3-haiku': 200000,
+      'claude-3-sonnet': 200000,
+      'claude-3-opus': 200000
+    };
+
+    return modelLimits[this.MODEL_NAME] || 8192; // Default to 8192 if model not found
+  }
+
+  /**
+   * Truncate messages to fit within token limit
+   */
+  private truncateMessages(messages: any[], maxTokens: number): any[] {
+    const truncatedMessages = [...messages];
+    let currentTokens = this.estimateTokenCount(truncatedMessages);
+
+    // Always keep the system message (first message) if it exists
+    const systemMessageIndex = truncatedMessages.findIndex(m => m.role === 'system');
+    const systemMessage = systemMessageIndex >= 0 ? truncatedMessages[systemMessageIndex] : null;
+
+    // Remove messages from the middle, keeping recent ones
+    while (currentTokens > maxTokens && truncatedMessages.length > 2) {
+      // Find the oldest non-system message to remove
+      let removeIndex = -1;
+      for (let i = 0; i < truncatedMessages.length; i++) {
+        if (truncatedMessages[i].role !== 'system') {
+          removeIndex = i;
+          break;
+        }
+      }
+
+      if (removeIndex >= 0) {
+        truncatedMessages.splice(removeIndex, 1);
+        currentTokens = this.estimateTokenCount(truncatedMessages);
+      } else {
+        break;
+      }
+    }
+
+    // If still too long, truncate the content of the longest message
+    if (currentTokens > maxTokens) {
+      let longestIndex = 0;
+      let longestLength = 0;
+
+      for (let i = 0; i < truncatedMessages.length; i++) {
+        if (truncatedMessages[i].role !== 'system' && truncatedMessages[i].content.length > longestLength) {
+          longestLength = truncatedMessages[i].content.length;
+          longestIndex = i;
+        }
+      }
+
+      // Truncate the longest message
+      const targetLength = Math.floor(truncatedMessages[longestIndex].content.length * 0.7);
+      truncatedMessages[longestIndex].content =
+        truncatedMessages[longestIndex].content.substring(0, targetLength) +
+        '\n\n[Content truncated due to token limit]';
+    }
+
+    return truncatedMessages;
   }
 }

@@ -10,6 +10,8 @@
     "rootDir": ".",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "outDir": "dist",
     "esModuleInterop": true,
     "moduleResolution": "node",
