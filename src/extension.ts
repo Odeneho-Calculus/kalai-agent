@@ -23,6 +23,7 @@ import { CollaborationService } from './services/collaborationService';
 import { PluginService } from './services/pluginService';
 import { IntegrationService } from './services/integrationService';
 import { PerformanceMonitor } from './utils/performanceMonitor';
+import { APIDiagnostics } from './services/apiDiagnostics';
 
 export function activate(context: vscode.ExtensionContext) {
   // Suppress experimental and deprecation warnings
@@ -229,6 +230,16 @@ export function activate(context: vscode.ExtensionContext) {
       } catch (error) {
         console.error('Error showing performance report:', error);
         vscode.window.showErrorMessage('Failed to show performance report');
+      }
+    }),
+
+    vscode.commands.registerCommand('kalai-agent.runDiagnostics', async () => {
+      try {
+        const diagnostics = APIDiagnostics.getInstance();
+        await diagnostics.displayDiagnosticReport();
+      } catch (error) {
+        console.error('Error running diagnostics:', error);
+        vscode.window.showErrorMessage(`Failed to run diagnostics: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }),
 

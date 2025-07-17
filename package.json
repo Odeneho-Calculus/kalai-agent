@@ -175,6 +175,12 @@
         "icon": "$(graph)"
       },
       {
+        "command": "kalai-agent.runDiagnostics",
+        "title": "Kalai: Run API Diagnostics",
+        "category": "Kalai Agent",
+        "icon": "$(pulse)"
+      },
+      {
         "command": "kalai-agent.generateMultiFileCode",
         "title": "Kalai: Generate Multi-File Code",
         "category": "Kalai Agent",
@@ -659,7 +665,10 @@
     "watch": "node -e \"const { build, extensionConfig, webviewConfig } = require('./esbuild.config.js'); const esbuild = require('esbuild'); Promise.all([esbuild.context(extensionConfig).then(ctx => ctx.watch()), esbuild.context(webviewConfig).then(ctx => ctx.watch())]).then(() => console.log('Watching for changes...'));\"",
     "debug": "npm run compile",
     "package": "npm run compile && vsce package",
-    "publish": "vsce publish"
+    "publish": "vsce publish",
+    "publish-full": "node publish.js",
+    "publish-marketplace": "npm run compile && vsce publish",
+    "publish-ovsx": "npm run compile && vsce package && ovsx publish"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

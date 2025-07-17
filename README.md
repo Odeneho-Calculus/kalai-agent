@@ -40,14 +40,31 @@ Kalai Agent is an advanced AI-powered coding assistant that provides comprehensi
 
 <!-- ![Code Editing](media/docs/code-editing.png) -->
 
+## Installation
+
+### From VS Code Marketplace
+1. Open Visual Studio Code
+2. Go to the Extensions view (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+3. Search for "Kalai Agent"
+4. Click "Install" on the Kalai Agent extension by Kalculus
+5. Restart VS Code when prompted
+
+### From VSIX File
+1. Download the `.vsix` file from the [releases page](https://github.com/Odeneho-Calculus/kalai-agent/releases)
+2. Open VS Code
+3. Go to Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+4. Type "Extensions: Install from VSIX..."
+5. Select the downloaded `.vsix` file
+6. Restart VS Code when prompted
+
 ## Getting Started
 
-1. Install the extension from VS Code Marketplace
+1. After installation, the extension will be automatically activated
 2. Open any code file in VS Code
 3. Access the Kalai Agent through:
-   - Activity Bar Icon
+   - Activity Bar Icon (Kalai Agent panel)
    - Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-   - Context Menu (right-click)
+   - Context Menu (right-click on code)
 
 ## Usage Examples
 

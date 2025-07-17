@@ -554,7 +554,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         // Try AI service first, but with timeout
         const aiPromise = this._aiService.sendMessage(userMessage, aiContext);
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('AI service timeout')), 10000)
+          setTimeout(() => reject(new Error('AI service timeout')), 90000)
         );
 
         response = await Promise.race([aiPromise, timeoutPromise]);
@@ -565,6 +565,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
 
       console.log('Sending response:', response);
+
+      // Format the response if it's JSON
+      response = this.formatAIResponse(response);
 
       // Generate sample code actions for demonstration
       let codeActions: any[] = [];
@@ -1302,5 +1305,125 @@ Here are some ways to improve your code:
       '.yaml': 'yaml'
     };
     return languageMap[extension] || 'text';
+  }
+
+  /**
+   * Format AI response to be user-friendly
+   * Converts JSON responses to readable markdown format
+   */
+  private formatAIResponse(response: string): string {
+    try {
+      // Check if response looks like JSON
+      if (response.trim().startsWith('{') && response.trim().endsWith('}')) {
+        const parsed = JSON.parse(response);
+
+        // Check if it's a code analysis response
+        if (parsed.warnings && parsed.suggestions) {
+          return this.formatCodeAnalysisResponse(parsed);
+        }
+
+        // For other JSON responses, format them nicely
+        return this.formatGenericJsonResponse(parsed);
+      }
+
+      // Check if response starts with ```json
+      if (response.includes('```json')) {
+        const jsonMatch = response.match(/```json\s*\n([\s\S]*?)\n```/);
+        if (jsonMatch) {
+          try {
+            const parsed = JSON.parse(jsonMatch[1]);
+            if (parsed.warnings && parsed.suggestions) {
+              return this.formatCodeAnalysisResponse(parsed);
+            }
+            return this.formatGenericJsonResponse(parsed);
+          } catch (e) {
+            // If JSON parsing fails, return original
+            return response;
+          }
+        }
+      }
+
+      // Return original response if not JSON
+      return response;
+    } catch (error) {
+      // If any error occurs, return original response
+      return response;
+    }
+  }
+
+  private formatCodeAnalysisResponse(analysis: any): string {
+    let formatted = '# Code Analysis Results\n\n';
+
+    if (analysis.warnings && analysis.warnings.length > 0) {
+      formatted += '## ⚠️ Warnings\n\n';
+      analysis.warnings.forEach((warning: any, index: number) => {
+        const severityIcon = {
+          'high': '🔴',
+          'medium': '🟡',
+          'low': '🟢'
+        }[warning.severity] || '⚠️';
+
+        formatted += `### ${severityIcon} ${warning.severity.toUpperCase()}: ${warning.message}\n`;
+        formatted += `**Location:** ${warning.location}\n`;
+        formatted += `**Category:** ${warning.category}\n`;
+        formatted += `**Impact:** ${warning.impact}\n\n`;
+      });
+    }
+
+    if (analysis.suggestions && analysis.suggestions.length > 0) {
+      formatted += '## 💡 Suggestions\n\n';
+      analysis.suggestions.forEach((suggestion: any, index: number) => {
+        formatted += `### ${index + 1}. ${suggestion.description}\n`;
+        formatted += `**Category:** ${suggestion.category}\n`;
+
+        if (suggestion.before && suggestion.after) {
+          formatted += '**Before:**\n```typescript\n' + suggestion.before + '\n```\n';
+          formatted += '**After:**\n```typescript\n' + suggestion.after + '\n```\n\n';
+        }
+      });
+    }
+
+    formatted += '---\n\n';
+    formatted += '💡 **Need help implementing these fixes?** Ask me to "apply the suggestions" or "fix the warnings"!';
+
+    return formatted;
+  }
+
+  private formatGenericJsonResponse(data: any): string {
+    let formatted = '# Response\n\n';
+
+    if (typeof data === 'object' && data !== null) {
+      formatted += this.formatObjectAsMarkdown(data);
+    } else {
+      formatted += '```json\n' + JSON.stringify(data, null, 2) + '\n```';
+    }
+
+    return formatted;
+  }
+
+  private formatObjectAsMarkdown(obj: any, level: number = 2): string {
+    let result = '';
+
+    for (const [key, value] of Object.entries(obj)) {
+      const headerLevel = '#'.repeat(level);
+      result += `${headerLevel} ${key}\n\n`;
+
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          result += `${index + 1}. `;
+          if (typeof item === 'object') {
+            result += '\n' + this.formatObjectAsMarkdown(item, level + 1);
+          } else {
+            result += `${item}\n`;
+          }
+        });
+      } else if (typeof value === 'object' && value !== null) {
+        result += this.formatObjectAsMarkdown(value, level + 1);
+      } else {
+        result += `${value}\n\n`;
+      }
+    }
+
+    return result;
   }
 }

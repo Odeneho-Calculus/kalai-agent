@@ -1301,7 +1301,23 @@ Consider the current project context and dependencies. Respond only with the mod
    */
   private async callAIModelWithRateLimit(messages: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.requestQueue.push({ resolve, reject, messages });
+      // Add timeout to prevent hanging requests
+      const timeoutId = setTimeout(() => {
+        reject(new Error('Request timed out after 75 seconds'));
+      }, 75000);
+
+      this.requestQueue.push({
+        resolve: (result: string) => {
+          clearTimeout(timeoutId);
+          resolve(result);
+        },
+        reject: (error: Error) => {
+          clearTimeout(timeoutId);
+          reject(error);
+        },
+        messages
+      });
+
       this.processRequestQueue();
     });
   }
