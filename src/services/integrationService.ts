@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
 
 export interface EnterpriseIntegration {
@@ -527,13 +527,13 @@ export interface ComplianceDetail {
     recommendations: string[];
 }
 
-export class EnterpriseIntegrationService {
+export class IntegrationService {
     private integrations: Map<string, EnterpriseIntegration> = new Map();
-    private repoGrokkingService: RepoGrokkingService;
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
 
-    constructor(repoGrokkingService: RepoGrokkingService, aiService: AIService) {
-        this.repoGrokkingService = repoGrokkingService;
+    constructor(repositoryAnalysisService: RepositoryAnalysisService, aiService: AIService) {
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
         this.initializeDefaultIntegrations();
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ModernChatInterface } from './ModernChatInterface';
+import { ChatInterface } from './ChatInterface';
 
 declare global {
     interface Window {
@@ -68,5 +68,5 @@ export const App: React.FC = () => {
         );
     }
 
-    return <ModernChatInterface />;
+    return <ChatInterface />;
 };

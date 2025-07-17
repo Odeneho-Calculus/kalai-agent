@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
 
 export interface TeamMember {
@@ -346,17 +346,17 @@ export interface TrendPrediction {
     opportunities: string[];
 }
 
-export class TeamCollaborationService {
+export class CollaborationService {
     private teamMembers: Map<string, TeamMember> = new Map();
     private sharedContexts: Map<string, SharedContext> = new Map();
     private collaborationSessions: Map<string, CollaborationSession> = new Map();
     private knowledgeBase: Map<string, KnowledgeBase> = new Map();
     private teamInsights: Map<string, TeamInsights> = new Map();
-    private repoGrokkingService: RepoGrokkingService;
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
 
-    constructor(repoGrokkingService: RepoGrokkingService, aiService: AIService) {
-        this.repoGrokkingService = repoGrokkingService;
+    constructor(repositoryAnalysisService: RepositoryAnalysisService, aiService: AIService) {
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
         this.initializeDefaultTeam();
     }
@@ -725,7 +725,7 @@ export class TeamCollaborationService {
         description: string
     ): Promise<CollaborationSession> {
         const analysisResults = await Promise.all(
-            files.map(file => this.repoGrokkingService.analyzeFile(file))
+            files.map(file => this.repositoryAnalysisService.analyzeFile(file))
         );
 
         const contextContent = {
@@ -736,7 +736,7 @@ export class TeamCollaborationService {
         };
 
         const context = await this.shareContext(
-            this.repoGrokkingService.getRepositoryPath(),
+            this.repositoryAnalysisService.getRepositoryPath(),
             'code-selection',
             contextContent,
             reviewers,
@@ -1091,7 +1091,7 @@ export class TeamCollaborationService {
         };
 
         for (const file of files) {
-            const analysis = await this.repoGrokkingService.analyzeFile(file);
+            const analysis = await this.repositoryAnalysisService.analyzeFile(file);
             // Aggregate metrics
         }
 

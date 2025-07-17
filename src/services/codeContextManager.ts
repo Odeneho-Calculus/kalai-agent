@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { ContextSelection } from './contextSelectorService';
+import { ContextSelection } from './contextService';
 
 export interface FileContext {
     content: string;

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AIService } from './aiService';
-import { RepoGrokkingService, CodeElement } from './repoGrokkingService';
+import { RepositoryAnalysisService, CodeElement } from './repositoryAnalysisService';
 import { FileContext, ProjectContext } from './codeContextManager';
 
 export interface AgenticTask {
@@ -150,15 +150,15 @@ export interface PipelineConfiguration {
 
 export class AgenticPipelineService {
     private aiService: AIService;
-    private repoGrokkingService: RepoGrokkingService;
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private activeTasks: Map<string, AgenticTask> = new Map();
     private taskQueue: AgenticTask[] = [];
     private isProcessing = false;
     private config: PipelineConfiguration;
 
-    constructor(aiService: AIService, repoGrokkingService: RepoGrokkingService) {
+    constructor(aiService: AIService, repositoryAnalysisService: RepositoryAnalysisService) {
         this.aiService = aiService;
-        this.repoGrokkingService = repoGrokkingService;
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.config = {
             enableValidation: true,
             enableTesting: true,
@@ -184,7 +184,7 @@ export class AgenticPipelineService {
 
         // Get current project context
         const projectContext = await this.getProjectContext();
-        const repoIndex = this.repoGrokkingService.getRepositoryIndex();
+        const repoIndex = this.repositoryAnalysisService.getRepositoryIndex();
 
         const task: AgenticTask = {
             id: taskId,
@@ -497,7 +497,7 @@ export class AgenticPipelineService {
      */
     private async performAnalysis(task: AgenticTask, step: TaskStep): Promise<any> {
         const { context } = task;
-        const repoIndex = this.repoGrokkingService.getRepositoryIndex();
+        const repoIndex = this.repositoryAnalysisService.getRepositoryIndex();
 
         // Analyze target files
         const fileAnalysis = await this.analyzeTargetFiles(context.targetFiles);
@@ -506,10 +506,10 @@ export class AgenticPipelineService {
         const dependencyAnalysis = await this.analyzeDependencies(context.targetFiles);
 
         // Analyze architectural patterns
-        const architecturalAnalysis = this.repoGrokkingService.getArchitecturalPatterns();
+        const architecturalAnalysis = this.repositoryAnalysisService.getArchitecturalPatterns();
 
         // Analyze naming conventions
-        const namingAnalysis = this.repoGrokkingService.getNamingConventions();
+        const namingAnalysis = this.repositoryAnalysisService.getNamingConventions();
 
         return {
             fileAnalysis,

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 
 export interface PerformanceMetrics {
     timestamp: Date;
@@ -131,8 +131,8 @@ export interface PerformanceThreshold {
     unit: string;
 }
 
-export class PerformanceMonitoringService {
-    private repoGrokkingService: RepoGrokkingService;
+export class PerformanceService {
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private metrics: PerformanceMetrics[] = [];
     private alerts: PerformanceAlert[] = [];
     private reports: PerformanceReport[] = [];
@@ -147,8 +147,8 @@ export class PerformanceMonitoringService {
         { metric: 'indexing-time', warning: 30000, critical: 60000, unit: 'ms' }
     ];
 
-    constructor(repoGrokkingService: RepoGrokkingService) {
-        this.repoGrokkingService = repoGrokkingService;
+    constructor(repositoryAnalysisService: RepositoryAnalysisService) {
+        this.repositoryAnalysisService = repositoryAnalysisService;
     }
 
     /**
@@ -405,7 +405,7 @@ export class PerformanceMonitoringService {
 
     private async collectRepoAnalysisMetrics(): Promise<RepoAnalysisMetrics> {
         // Get metrics from repo grokking service
-        const repoStats = await this.repoGrokkingService.getRepositoryStats();
+        const repoStats = await this.repositoryAnalysisService.getRepositoryStats();
 
         return {
             indexingTime: Math.random() * 5000,

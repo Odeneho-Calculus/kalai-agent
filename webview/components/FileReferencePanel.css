@@ -146,8 +146,134 @@
     color: white;
     padding: 2px 6px;
     border-radius: 8px;
+    background-color: #666;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Language-specific colors */
+.language-javascript {
+    background-color: #f7df1e;
+    color: #000;
+}
+
+.language-typescript {
+    background-color: #3178c6;
+}
+
+.language-python {
+    background-color: #3776ab;
+}
+
+.language-java {
+    background-color: #ed8b00;
+}
+
+.language-html {
+    background-color: #e34f26;
+}
+
+.language-css {
+    background-color: #1572b6;
+}
+
+.language-json {
+    background-color: #000000;
+}
+
+.language-markdown {
+    background-color: #083fa1;
+}
+
+.language-yaml {
+    background-color: #cb171e;
+}
+
+.language-yml {
+    background-color: #cb171e;
+}
+
+.language-xml {
+    background-color: #e34f26;
+}
+
+.language-jsx {
+    background-color: #61dafb;
+    color: #000;
+}
+
+.language-tsx {
+    background-color: #3178c6;
+}
+
+.language-php {
+    background-color: #777bb4;
+}
+
+.language-cpp {
+    background-color: #00599c;
+}
+
+.language-c {
+    background-color: #a8b9cc;
+}
+
+.language-csharp {
+    background-color: #239120;
+}
+
+.language-go {
+    background-color: #00add8;
+}
+
+.language-rust {
+    background-color: #dea584;
+}
+
+.language-ruby {
+    background-color: #cc342d;
+}
+
+.language-swift {
+    background-color: #fa7343;
+}
+
+.language-kotlin {
+    background-color: #7f52ff;
+}
+
+.language-dart {
+    background-color: #0175c2;
+}
+
+.language-r {
+    background-color: #276dc3;
+}
+
+.language-scala {
+    background-color: #dc322f;
+}
+
+.language-shell {
+    background-color: #89e051;
+    color: #000;
+}
+
+.language-bash {
+    background-color: #89e051;
+    color: #000;
+}
+
+.language-powershell {
+    background-color: #012456;
+}
+
+.language-dockerfile {
+    background-color: #384d54;
+}
+
+.language-text {
+    background-color: #666;
 }
 
 .expand-btn,
@@ -309,6 +435,7 @@
         opacity: 0;
         max-height: 0;
     }
+
     to {
         opacity: 1;
         max-height: 300px;

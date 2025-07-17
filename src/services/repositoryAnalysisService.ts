@@ -108,7 +108,7 @@ export interface ArchitecturalPattern {
     characteristics: string[];
 }
 
-export class RepoGrokkingService {
+export class RepositoryAnalysisService {
     private repositoryIndex: RepositoryIndex | null = null;
     private indexingInProgress = false;
     private fileWatcher: vscode.FileSystemWatcher | null = null;

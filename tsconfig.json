@@ -9,6 +9,7 @@
     "sourceMap": true,
     "rootDir": ".",
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "esModuleInterop": true,
     "moduleResolution": "node",

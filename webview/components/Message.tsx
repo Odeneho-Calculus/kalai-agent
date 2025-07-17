@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MarkdownRenderer } from './MarkdownRenderer';
-import './ModernMessage.css';
+import './Message.css';
 import {
     Refresh,
     Edit,
@@ -37,10 +37,11 @@ export interface Message {
         language?: string;
         model?: string;
         tokens?: number;
+        isStreaming?: boolean;
     };
 }
 
-interface ModernMessageProps {
+interface MessageProps {
     message: Message;
     onRegenerate?: (messageId: string) => void;
     onCopy?: (content: string) => void;
@@ -49,7 +50,7 @@ interface ModernMessageProps {
     isLast?: boolean;
 }
 
-export const ModernMessage: React.FC<ModernMessageProps> = ({
+export const Message: React.FC<MessageProps> = ({
     message,
     onRegenerate,
     onCopy,
@@ -190,6 +191,8 @@ export const ModernMessage: React.FC<ModernMessageProps> = ({
                         onChange={(e) => setEditContent(e.target.value)}
                         className="edit-textarea"
                         autoFocus
+                        aria-label="Edit message content"
+                        title="Edit message content"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && e.ctrlKey) {
                                 handleEdit();
@@ -205,7 +208,7 @@ export const ModernMessage: React.FC<ModernMessageProps> = ({
                         {shouldUseMarkdown(message.content) ? (
                             <MarkdownRenderer content={message.content} />
                         ) : (
-                            <div style={{ whiteSpace: 'pre-wrap' }}>
+                            <div className="message-text-content">
                                 {message.content}
                             </div>
                         )}

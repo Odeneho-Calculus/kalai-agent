@@ -1,241 +1,293 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ContextPanel.css';
-import {
-    Build,
-    Folder,
-    Inventory,
-    Assignment,
-    Description,
-    Edit,
-    Refresh,
-    AccountTree,
-    Close
-} from '@mui/icons-material';
 
-declare global {
-    interface Window {
-        vscode: {
-            postMessage: (message: any) => void;
-        };
-    }
+interface FileContext {
+    path: string;
+    name: string;
+    language: string;
+    content?: string;
+    isActive: boolean;
+}
+
+interface ProjectInfo {
+    name: string;
+    files: string[];
+    dependencies: Record<string, string>;
+    framework?: string;
 }
 
 interface ContextPanelProps {
-    contextData: any;
+    isVisible: boolean;
     onClose: () => void;
+    onFileSelect: (files: string[]) => void;
 }
 
 export const ContextPanel: React.FC<ContextPanelProps> = ({
-    contextData,
-    onClose
+    isVisible,
+    onClose,
+    onFileSelect
 }) => {
-    const [activeTab, setActiveTab] = useState<'project' | 'files' | 'dependencies' | 'git'>('project');
+    const [activeTab, setActiveTab] = useState<'files' | 'context' | 'search'>('files');
+    const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+    const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const tabs = [
-        { id: 'project', label: 'Project', icon: <Build fontSize="small" /> },
-        { id: 'files', label: 'Files', icon: <Folder fontSize="small" /> },
-        { id: 'dependencies', label: 'Dependencies', icon: <Inventory fontSize="small" /> },
-        { id: 'git', label: 'Git', icon: <AccountTree fontSize="small" /> }
-    ];
+    useEffect(() => {
+        if (isVisible) {
+            loadProjectInfo();
+        }
+    }, [isVisible]);
 
-    const renderProjectInfo = () => (
-        <div className="context-section">
-            <h3>Project Overview</h3>
-            {contextData?.projectStructure && (
-                <div className="project-info">
-                    <div className="info-item">
-                        <span className="label">Framework:</span>
-                        <span className="value">{contextData.detectedFramework || 'Unknown'}</span>
-                    </div>
-                    <div className="info-item">
-                        <span className="label">Total Files:</span>
-                        <span className="value">{contextData.files?.length || 0}</span>
-                    </div>
-                    <div className="info-item">
-                        <span className="label">Languages:</span>
-                        <div className="language-list">
-                            {contextData.projectStructure.languages?.map((lang: string, index: number) => (
-                                <span key={index} className="language-tag">{lang}</span>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {contextData?.buildConfig && (
-                <div className="build-info">
-                    <h4>Build Configuration</h4>
-                    <div className="config-item">
-                        <span className="label">Build Tool:</span>
-                        <span className="value">{contextData.buildConfig.tool}</span>
-                    </div>
-                    <div className="config-item">
-                        <span className="label">Scripts:</span>
-                        <div className="scripts-list">
-                            {Object.entries(contextData.buildConfig.scripts || {}).map(([name, command]) => (
-                                <div key={name} className="script-item">
-                                    <span className="script-name">{name}:</span>
-                                    <span className="script-command">{command as string}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-
-    const renderFilesInfo = () => (
-        <div className="context-section">
-            <h3>Project Files</h3>
-            <div className="files-tree">
-                {contextData?.files?.slice(0, 20).map((file: any, index: number) => (
-                    <div key={index} className="file-tree-item">
-                        <Description fontSize="small" style={{ marginRight: '8px' }} />
-                        <span className="file-name">{file.relativePath}</span>
-                        <span className="file-language">{file.language}</span>
-                    </div>
-                ))}
-                {contextData?.files?.length > 20 && (
-                    <div className="more-files">
-                        ... and {contextData.files.length - 20} more files
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-
-    const renderDependenciesInfo = () => (
-        <div className="context-section">
-            <h3>Dependencies</h3>
-            {contextData?.dependencies && (
-                <div className="dependencies-list">
-                    {Object.entries(contextData.dependencies).map(([name, version]) => (
-                        <div key={name} className="dependency-item">
-                            <span className="dep-name">{name}</span>
-                            <span className="dep-version">{version as string}</span>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {contextData?.projectStructure?.packageManagers && (
-                <div className="package-managers">
-                    <h4>Package Managers</h4>
-                    {contextData.projectStructure.packageManagers.map((pm: string, index: number) => (
-                        <span key={index} className="package-manager-tag">{pm}</span>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-
-    const renderGitInfo = () => (
-        <div className="context-section">
-            <h3>Git Information</h3>
-            {contextData?.gitInfo ? (
-                <div className="git-info">
-                    <div className="info-item">
-                        <span className="label">Current Branch:</span>
-                        <span className="value">{contextData.gitInfo.currentBranch}</span>
-                    </div>
-                    <div className="info-item">
-                        <span className="label">Remote URL:</span>
-                        <span className="value">{contextData.gitInfo.remoteUrl}</span>
-                    </div>
-                    <div className="info-item">
-                        <span className="label">Last Commit:</span>
-                        <span className="value">{contextData.gitInfo.lastCommit}</span>
-                    </div>
-                    <div className="info-item">
-                        <span className="label">Status:</span>
-                        <span className="value">{contextData.gitInfo.hasChanges ? 'Has changes' : 'Clean'}</span>
-                    </div>
-                </div>
-            ) : (
-                <div className="no-git">
-                    <Edit fontSize="small" style={{ marginRight: '8px' }} />
-                    <span>No Git repository detected</span>
-                </div>
-            )}
-        </div>
-    );
-
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case 'project':
-                return renderProjectInfo();
-            case 'files':
-                return renderFilesInfo();
-            case 'dependencies':
-                return renderDependenciesInfo();
-            case 'git':
-                return renderGitInfo();
-            default:
-                return null;
+    const loadProjectInfo = async () => {
+        setIsLoading(true);
+        try {
+            window.vscode?.postMessage({
+                type: 'getProjectInfo',
+                data: {}
+            });
+        } catch (error) {
+            console.error('Error loading project info:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
+    const handleSearch = async (query: string) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            window.vscode?.postMessage({
+                type: 'searchInFiles',
+                query: query
+            });
+        } catch (error) {
+            console.error('Error searching files:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const toggleFileSelection = (filePath: string) => {
+        setSelectedFiles(prev => {
+            const isSelected = prev.includes(filePath);
+            if (isSelected) {
+                return prev.filter(f => f !== filePath);
+            } else {
+                return [...prev, filePath];
+            }
+        });
+    };
+
+    const handleAddSelected = () => {
+        onFileSelect(selectedFiles);
+        setSelectedFiles([]);
+    };
+
+    const handleAddCurrentFile = () => {
+        window.vscode?.postMessage({
+            type: 'addCurrentFile',
+            data: {}
+        });
+    };
+
+    const getFileIcon = (fileName: string) => {
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        switch (ext) {
+            case 'js':
+            case 'jsx':
+                return '📄';
+            case 'ts':
+            case 'tsx':
+                return '📘';
+            case 'py':
+                return '🐍';
+            case 'java':
+                return '☕';
+            case 'css':
+                return '🎨';
+            case 'html':
+                return '🌐';
+            case 'json':
+                return '📋';
+            case 'md':
+                return '📝';
+            default:
+                return '📄';
+        }
+    };
+
+    if (!isVisible) return null;
+
     return (
-        <div className="context-panel">
-            <div className="panel-header">
-                <div className="header-left">
-                    <Assignment fontSize="small" style={{ marginRight: '8px' }} />
-                    <span className="panel-title">Project Context</span>
+        <div className="modern-context-panel">
+            <div className="context-header">
+                <div className="header-title">
+                    <span className="title-icon">📁</span>
+                    <span>Project Context</span>
                 </div>
                 <button className="close-btn" onClick={onClose}>
-                    <Close fontSize="small" />
+                    ✕
                 </button>
             </div>
 
-            <div className="panel-tabs">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab.id as any)}
-                    >
-                        <span className="tab-icon">{tab.icon}</span>
-                        <span className="tab-label">{tab.label}</span>
-                    </button>
-                ))}
+            <div className="context-tabs">
+                <button
+                    className={`tab ${activeTab === 'files' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('files')}
+                >
+                    📁 Files
+                </button>
+                <button
+                    className={`tab ${activeTab === 'context' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('context')}
+                >
+                    🔍 Context
+                </button>
+                <button
+                    className={`tab ${activeTab === 'search' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('search')}
+                >
+                    🔎 Search
+                </button>
             </div>
 
-            <div className="panel-content">
-                {contextData ? (
-                    renderTabContent()
-                ) : (
-                    <div className="loading-state">
-                        <div className="loading-spinner">⏳</div>
-                        <div className="loading-text">Loading context...</div>
+            <div className="context-content">
+                {activeTab === 'files' && (
+                    <div className="files-tab">
+                        <div className="quick-actions">
+                            <button
+                                className="action-btn primary"
+                                onClick={handleAddCurrentFile}
+                            >
+                                📄 Add Current File
+                            </button>
+                            {selectedFiles.length > 0 && (
+                                <button
+                                    className="action-btn secondary"
+                                    onClick={handleAddSelected}
+                                >
+                                    ➕ Add Selected ({selectedFiles.length})
+                                </button>
+                            )}
+                        </div>
+
+                        {isLoading ? (
+                            <div className="loading-state">
+                                <div className="spinner"></div>
+                                <span>Loading project files...</span>
+                            </div>
+                        ) : (
+                            <div className="files-list">
+                                {projectInfo?.files.map((file, index) => (
+                                    <div
+                                        key={index}
+                                        className={`file-item ${selectedFiles.includes(file) ? 'selected' : ''}`}
+                                        onClick={() => toggleFileSelection(file)}
+                                    >
+                                        <span className="file-icon">{getFileIcon(file)}</span>
+                                        <span className="file-path">{file}</span>
+                                        <span className="file-name">{file.split('/').pop()}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
-            </div>
 
-            <div className="panel-footer">
-                <button
-                    className="refresh-btn"
-                    onClick={() => {
-                        window.vscode.postMessage({
-                            type: 'refreshContext',
-                            data: {}
-                        });
-                    }}
-                >
-                    <Refresh fontSize="small" style={{ marginRight: '4px' }} />
-                    Refresh
-                </button>
-                <button
-                    className="export-btn"
-                    onClick={() => {
-                        window.vscode.postMessage({
-                            type: 'exportContext',
-                            data: { context: contextData }
-                        });
-                    }}
-                >
-                    📤 Export
-                </button>
+                {activeTab === 'context' && (
+                    <div className="context-tab">
+                        <div className="context-info">
+                            {projectInfo && (
+                                <>
+                                    <div className="info-section">
+                                        <h3>Project Information</h3>
+                                        <div className="info-item">
+                                            <span className="label">Name:</span>
+                                            <span className="value">{projectInfo.name}</span>
+                                        </div>
+                                        {projectInfo.framework && (
+                                            <div className="info-item">
+                                                <span className="label">Framework:</span>
+                                                <span className="value">{projectInfo.framework}</span>
+                                            </div>
+                                        )}
+                                        <div className="info-item">
+                                            <span className="label">Files:</span>
+                                            <span className="value">{projectInfo.files.length}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="info-section">
+                                        <h3>Dependencies</h3>
+                                        <div className="dependencies-list">
+                                            {Object.entries(projectInfo.dependencies).slice(0, 10).map(([name, version]) => (
+                                                <div key={name} className="dependency-item">
+                                                    <span className="dep-name">{name}</span>
+                                                    <span className="dep-version">{version}</span>
+                                                </div>
+                                            ))}
+                                            {Object.keys(projectInfo.dependencies).length > 10 && (
+                                                <div className="more-deps">
+                                                    +{Object.keys(projectInfo.dependencies).length - 10} more...
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'search' && (
+                    <div className="search-tab">
+                        <div className="search-input-container">
+                            <input
+                                type="text"
+                                placeholder="Search in files..."
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    handleSearch(e.target.value);
+                                }}
+                                className="search-input"
+                            />
+                            <button
+                                className="search-btn"
+                                onClick={() => handleSearch(searchQuery)}
+                            >
+                                🔍
+                            </button>
+                        </div>
+
+                        {isLoading ? (
+                            <div className="loading-state">
+                                <div className="spinner"></div>
+                                <span>Searching...</span>
+                            </div>
+                        ) : (
+                            <div className="search-results">
+                                {searchResults.map((result, index) => (
+                                    <div key={index} className="search-result">
+                                        <span className="result-icon">🔍</span>
+                                        <span className="result-text">{result}</span>
+                                    </div>
+                                ))}
+                                {searchQuery && searchResults.length === 0 && !isLoading && (
+                                    <div className="no-results">
+                                        No results found for "{searchQuery}"
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

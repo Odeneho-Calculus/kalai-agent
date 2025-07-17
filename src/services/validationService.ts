@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
 
 export interface ValidationResult {
@@ -59,14 +59,14 @@ export interface ValidationRule {
     autoFix?: (content: string, error: ValidationError) => string;
 }
 
-export class ValidationFrameworkService {
-    private repoGrokkingService: RepoGrokkingService;
+export class ValidationService {
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
     private validationRules: Map<string, ValidationRule> = new Map();
     private validationCache: Map<string, ValidationResult> = new Map();
 
-    constructor(repoGrokkingService: RepoGrokkingService, aiService: AIService) {
-        this.repoGrokkingService = repoGrokkingService;
+    constructor(repositoryAnalysisService: RepositoryAnalysisService, aiService: AIService) {
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
         this.initializeDefaultRules();
     }
@@ -275,7 +275,7 @@ export class ValidationFrameworkService {
             await fs.promises.writeFile(filePath, content, 'utf-8');
 
             // Update repository index
-            await this.repoGrokkingService.updateIndex([filePath]);
+            await this.repositoryAnalysisService.updateIndex([filePath]);
         }
 
         return { fixedErrors, appliedFixes };
@@ -337,7 +337,7 @@ export class ValidationFrameworkService {
      */
     private async validateNamingConventions(content: string, filePath: string): Promise<ValidationError[]> {
         const errors: ValidationError[] = [];
-        const projectPatterns = await this.repoGrokkingService.getProjectPatterns();
+        const projectPatterns = await this.repositoryAnalysisService.getProjectPatterns();
 
         // Check function naming
         const functionRegex = /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
@@ -514,7 +514,7 @@ Format your response as JSON with warnings and suggestions arrays.
         }
 
         // Check for circular dependencies
-        const dependencies = await this.repoGrokkingService.getFileDependencies(filePath);
+        const dependencies = await this.repositoryAnalysisService.getFileDependencies(filePath);
         const circularDeps = await this.detectCircularDependencies(filePath, dependencies);
 
         if (circularDeps.length > 0) {

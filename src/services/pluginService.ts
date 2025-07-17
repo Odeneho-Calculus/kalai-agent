@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
 
 export interface Plugin {
@@ -211,7 +211,7 @@ export interface PluginContext {
 }
 
 export interface KalaiAPI {
-    repo: RepoGrokkingService;
+    repo: RepositoryAnalysisService;
     ai: AIService;
     analysis: any;
     utils: KalaiUtils;
@@ -378,20 +378,20 @@ export interface DiscoveryFilter {
     operator: 'equals' | 'contains' | 'greater' | 'less' | 'matches';
 }
 
-export class ExtensibilityService {
+export class PluginService {
     private registry: PluginRegistry;
     private discovery: PluginDiscovery;
-    private repoGrokkingService: RepoGrokkingService;
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
     private pluginDirectory: string;
     private isInitialized: boolean = false;
 
     constructor(
-        repoGrokkingService: RepoGrokkingService,
+        repositoryAnalysisService: RepositoryAnalysisService,
         aiService: AIService,
         context: vscode.ExtensionContext
     ) {
-        this.repoGrokkingService = repoGrokkingService;
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
         this.pluginDirectory = path.join(context.extensionPath, 'plugins');
 
@@ -618,7 +618,7 @@ export class ExtensibilityService {
             plugin,
             vscode,
             kalai: {
-                repo: this.repoGrokkingService,
+                repo: this.repositoryAnalysisService,
                 ai: this.aiService,
                 analysis: null,
                 utils: {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { AIService } from '../services/aiService';
-import { ValidationFrameworkService } from '../services/validationFrameworkService';
-import { CoffeeModeService } from '../services/coffeeModeService';
+import { ValidationService } from '../services/validationService';
+import { AutomationService } from '../services/automationService';
 
 export interface FeedbackItem {
     id: string;
@@ -45,8 +45,8 @@ export interface ValidationFeedback {
 
 export class RealTimeFeedbackUI {
     private aiService: AIService;
-    private validationService: ValidationFrameworkService;
-    private coffeeModeService: CoffeeModeService;
+    private validationService: ValidationService;
+    private automationService: AutomationService;
 
     private feedbackPanel: vscode.WebviewPanel | undefined;
     private statusBarItems: Map<string, vscode.StatusBarItem> = new Map();
@@ -59,12 +59,12 @@ export class RealTimeFeedbackUI {
 
     constructor(
         aiService: AIService,
-        validationService: ValidationFrameworkService,
-        coffeeModeService: CoffeeModeService
+        validationService: ValidationService,
+        automationService: AutomationService
     ) {
         this.aiService = aiService;
         this.validationService = validationService;
-        this.coffeeModeService = coffeeModeService;
+        this.automationService = automationService;
 
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection('kalai-agent');
         this.initializeFeedbackSystem();
@@ -1131,8 +1131,8 @@ export class RealTimeFeedbackUI {
     }
 
     private getCoffeeFeedback(): any[] {
-        const coffeeStatus = this.coffeeModeService.getStatus();
-        const activeTasks = this.coffeeModeService.getActiveTasks();
+        const coffeeStatus = this.automationService.getStatus();
+        const activeTasks = this.automationService.getActiveTasks();
 
         return activeTasks.map(task => ({
             id: task.id,
@@ -1181,7 +1181,7 @@ export class RealTimeFeedbackUI {
 
         const coffeeStatus = this.statusBarItems.get('coffee');
         if (coffeeStatus) {
-            const coffeeMode = this.coffeeModeService.getStatus();
+            const coffeeMode = this.automationService.getStatus();
             if (coffeeMode.enabled) {
                 coffeeStatus.text = `$(coffee) Coffee Mode: ${coffeeMode.activeTasks} active`;
                 coffeeStatus.color = new vscode.ThemeColor('charts.orange');

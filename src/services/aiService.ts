@@ -1,9 +1,17 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import { AIRequestContext } from '../types/aiTypes';
-import { RepoGrokkingService, CodeElement, RepositoryIndex } from './repoGrokkingService';
-import { AgenticPipelineService, AgenticTask } from './agenticPipelineService';
+import { RepositoryAnalysisService, CodeElement, RepositoryIndex } from './repositoryAnalysisService';
+import { TaskOrchestrationService, TaskDefinition, AgenticTask, TaskContext } from './taskOrchestrationService';
 import { WebSearchService } from './webSearchService';
+
+// Secure configuration import with fallback
+let SECURE_CONFIG: any = null;
+try {
+  SECURE_CONFIG = require('../config/secure.config').SECURE_CONFIG;
+} catch (error) {
+  console.warn('⚠️  Kalai Agent: Secure configuration not found. Using user settings only.');
+}
 
 interface AIModelResponse {
   choices: {
@@ -29,7 +37,7 @@ interface EnhancedConversationContext {
 
 interface AICapabilities {
   repoGrokking: boolean;
-  agenticPipeline: boolean;
+  taskOrchestration: boolean;
   webSearch: boolean;
   multiFileOperations: boolean;
   autonomousMode: boolean;
@@ -113,27 +121,74 @@ interface ResponseMetadata {
 }
 
 export class AIService {
-  private readonly API_KEY = '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';
-  private readonly API_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
-  private readonly MODEL_NAME = 'qwen/qwen-2.5-7b-instruct:free';
+  private API_KEY!: string;
+  private API_ENDPOINT!: string;
+  private MODEL_NAME!: string;
+  private maxTokens!: number;
+  private temperature!: number;
   private readonly maxRetries: number = 3;
 
   private conversationHistory: EnhancedConversationContext;
-  private repoGrokkingService: RepoGrokkingService | null = null;
-  private agenticPipelineService: AgenticPipelineService | null = null;
+  private repositoryAnalysisService: RepositoryAnalysisService | null = null;
+  private taskOrchestrationService: TaskOrchestrationService | null = null;
   private webSearchService: WebSearchService | null = null;
   private projectAnalysisCache: Map<string, any> = new Map();
 
   constructor(
-    repoGrokkingService?: RepoGrokkingService,
-    agenticPipelineService?: AgenticPipelineService,
+    repositoryAnalysisService?: RepositoryAnalysisService,
+    taskOrchestrationService?: TaskOrchestrationService,
     webSearchService?: WebSearchService
   ) {
-    this.repoGrokkingService = repoGrokkingService || null;
-    this.agenticPipelineService = agenticPipelineService || null;
+    this.repositoryAnalysisService = repositoryAnalysisService || null;
+    this.taskOrchestrationService = taskOrchestrationService || null;
     this.webSearchService = webSearchService || null;
 
+    // Load configuration from VS Code settings
+    this.loadConfiguration();
+
     this.conversationHistory = this.initializeConversationContext();
+  }
+
+  private loadConfiguration(): void {
+    const config = vscode.workspace.getConfiguration('kalai-agent');
+
+    // Priority: User Settings > Secure Config > Defaults
+    this.API_KEY = config.get<string>('apiKey') ||
+      (SECURE_CONFIG?.defaultApiKey) ||
+      '';
+
+    this.API_ENDPOINT = config.get<string>('apiEndpoint') ||
+      (SECURE_CONFIG?.defaultApiEndpoint) ||
+      'https://openrouter.ai/api/v1/chat/completions';
+
+    this.MODEL_NAME = config.get<string>('modelName') ||
+      (SECURE_CONFIG?.defaultModelName) ||
+      'qwen/qwen-2.5-7b-instruct:free';
+
+    this.maxTokens = config.get<number>('maxTokens') || 2048;
+    this.temperature = config.get<number>('temperature') || 0.7;
+
+    // Validate API key availability
+    if (!this.API_KEY) {
+      console.error('❌ Kalai Agent: No API key configured. Please set up your API key in VS Code settings or secure configuration.');
+      vscode.window.showErrorMessage(
+        'Kalai Agent: No API key configured. Please configure your OpenRouter API key in settings.',
+        'Open Settings'
+      ).then(selection => {
+        if (selection === 'Open Settings') {
+          vscode.commands.executeCommand('workbench.action.openSettings', 'kalai-agent.apiKey');
+        }
+      });
+    } else {
+      console.log('✅ Kalai Agent: API key loaded successfully');
+    }
+  }
+
+  /**
+   * Refresh configuration when settings change
+   */
+  public refreshConfiguration(): void {
+    this.loadConfiguration();
   }
 
   private initializeConversationContext(): EnhancedConversationContext {
@@ -141,8 +196,8 @@ export class AIService {
       messages: [],
       mode: 'chat',
       capabilities: {
-        repoGrokking: !!this.repoGrokkingService,
-        agenticPipeline: !!this.agenticPipelineService,
+        repoGrokking: !!this.repositoryAnalysisService,
+        taskOrchestration: !!this.taskOrchestrationService,
         webSearch: !!this.webSearchService,
         multiFileOperations: true,
         autonomousMode: false,
@@ -215,9 +270,9 @@ export class AIService {
    * Build enhanced context with repo grokking insights
    */
   private async buildEnhancedContext(message: string, context?: AIRequestContext): Promise<EnhancedPromptContext | null> {
-    if (!this.repoGrokkingService) return null;
+    if (!this.repositoryAnalysisService) return null;
 
-    const repoIndex = this.repoGrokkingService.getRepositoryIndex();
+    const repoIndex = this.repositoryAnalysisService.getRepositoryIndex();
     const repoInsights = this.buildRepoInsights(repoIndex);
     const semanticContext = await this.buildSemanticContext(message, repoIndex);
     const architecturalContext = this.buildArchitecturalContext(repoIndex);
@@ -237,7 +292,7 @@ export class AIService {
    * Handle requests requiring agentic pipeline
    */
   private async handleAgenticRequest(message: string, context: EnhancedPromptContext | null): Promise<string> {
-    if (!this.agenticPipelineService) {
+    if (!this.taskOrchestrationService) {
       return await this.handleStandardRequest(message, context);
     }
 
@@ -245,18 +300,19 @@ export class AIService {
     const taskType = this.determineTaskType(message);
 
     // Create agentic task
-    const taskId = await this.agenticPipelineService.createTask(
+    const taskId = await this.taskOrchestrationService.createTask(
       taskType,
       message,
       {
-        userInstructions: message,
+        workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '',
+        userPrompt: message,
         targetFiles: this.extractTargetFiles(message),
-        projectContext: this.conversationHistory.projectContext!
+        repositoryContext: this.conversationHistory.projectContext!
       }
     );
 
     // Set current task in conversation
-    this.conversationHistory.currentTask = this.agenticPipelineService.getTask(taskId);
+    this.conversationHistory.currentTask = this.taskOrchestrationService.getTask(taskId);
 
     // Generate response about task creation
     const response = await this.generateTaskResponse(taskId, message, context);
@@ -378,10 +434,10 @@ export class AIService {
   }
 
   private async generateTaskResponse(taskId: string, message: string, context: EnhancedPromptContext | null): Promise<string> {
-    if (!this.agenticPipelineService) return "Task creation failed - pipeline not available";
+    if (!this.taskOrchestrationService) return "Task creation failed - pipeline not available";
 
-    const task = this.agenticPipelineService.getTask(taskId);
-    const progress = this.agenticPipelineService.getTaskProgress(taskId);
+    const task = this.taskOrchestrationService.getTask(taskId);
+    const progress = this.taskOrchestrationService.getTaskProgress(taskId);
 
     return `I've created an agentic task to handle your request: "${message}"
 
@@ -389,11 +445,11 @@ Task Details:
 - Task ID: ${taskId}
 - Type: ${task?.type}
 - Status: ${task?.status}
-- Progress: ${progress?.current}/${progress?.total} steps
+- Progress: ${progress?.progressPercentage || 0}% (${progress?.completedStages?.length || 0}/${progress?.totalStages || 0} stages)
 
 The task will be processed through multiple steps including analysis, planning, implementation, validation, and testing. You'll receive updates as the task progresses.
 
-Current Step: ${progress?.currentStep || 'Initializing...'}
+Current Stage: ${progress?.currentStage || 'Initializing...'}
 
 I'll keep you informed of the progress and results.`;
   }
@@ -428,7 +484,7 @@ I'll keep you informed of the progress and results.`;
   }
 
   private async buildSemanticContext(message: string, repoIndex: RepositoryIndex | null): Promise<SemanticContext> {
-    if (!repoIndex || !this.repoGrokkingService) {
+    if (!repoIndex || !this.repositoryAnalysisService) {
       return {
         relatedElements: [],
         dependencies: [],
@@ -438,7 +494,7 @@ I'll keep you informed of the progress and results.`;
       };
     }
 
-    const relatedElements = await this.repoGrokkingService.searchCodeElements(message, 5);
+    const relatedElements = await this.repositoryAnalysisService.searchCodeElements(message, 5);
     const dependencies = this.extractRelevantDependencies(message, repoIndex);
     const usagePatterns = this.analyzeUsagePatterns(relatedElements);
     const similarImplementations = await this.findSimilarImplementations(relatedElements);
@@ -695,9 +751,9 @@ User Expertise: ${context.userPreferences.explanationLevel}
   private async findSimilarImplementations(elements: CodeElement[]): Promise<CodeElement[]> {
     const similar: CodeElement[] = [];
 
-    if (this.repoGrokkingService) {
+    if (this.repositoryAnalysisService) {
       for (const element of elements) {
-        const similarElements = await this.repoGrokkingService.findSimilarElements(element, 3);
+        const similarElements = await this.repositoryAnalysisService.findSimilarElements(element, 3);
         similar.push(...similarElements);
       }
     }
@@ -828,38 +884,25 @@ Format your response as a structured plan with numbered steps.
 
     const planResponse = await this.callAIModel(messages);
 
-    // Store the task and plan
-    this.conversationHistory.currentTask = {
-      id: `task_${Date.now()}`,
-      type: 'analysis',
-      description: message,
-      priority: 1,
-      status: 'pending',
-      createdAt: new Date(),
-      context: {
-        workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '',
-        targetFiles: [],
-        userInstructions: message,
-        projectContext: this.conversationHistory.projectContext || {} as any,
-        repoIndex: this.repoGrokkingService?.getRepositoryIndex() || null,
-        constraints: {
-          maxFilesToModify: 10,
-          preserveExistingTests: true,
-          maintainBackwardCompatibility: true,
-          followProjectConventions: true,
-          requireValidation: true,
-          allowExternalDependencies: false
+    // Store the task and plan using TaskOrchestrationService
+    if (this.taskOrchestrationService) {
+      const taskId = await this.taskOrchestrationService.createTask(
+        'analysis',
+        message,
+        {
+          workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '',
+          targetFiles: [],
+          userPrompt: message,
+          repositoryContext: this.conversationHistory.projectContext || {} as any
+        },
+        {
+          maxRetries: 3,
+          requiresValidation: true,
+          maintainCompatibility: true
         }
-      },
-      steps: this.extractStepsFromPlan(planResponse).map((step, index) => ({
-        id: `step_${index}`,
-        type: 'analysis' as const,
-        description: step,
-        status: 'pending' as const,
-        input: {}
-      })),
-      currentStep: 0
-    } as AgenticTask;
+      );
+      this.conversationHistory.currentTask = this.taskOrchestrationService.getTask(taskId);
+    }
     this.conversationHistory.stepsPlan = this.extractStepsFromPlan(planResponse);
     this.conversationHistory.currentStep = 0;
 
@@ -1055,7 +1098,7 @@ Guidelines:
       let response: string;
 
       // Route to appropriate handler based on analysis
-      if (analysis.requiresAgenticPipeline && this.agenticPipelineService) {
+      if (analysis.requiresAgenticPipeline && this.taskOrchestrationService) {
         response = await this.handleAgenticRequest(message, enhancedContext);
       } else if (analysis.requiresWebSearch && this.webSearchService) {
         response = await this.handleWebSearchRequest(message, enhancedContext);
@@ -1091,18 +1134,18 @@ Guidelines:
   }
 
   public async getTaskStatus(taskId: string): Promise<string> {
-    if (!this.agenticPipelineService) {
+    if (!this.taskOrchestrationService) {
       return 'Agentic pipeline not available';
     }
 
-    const task = this.agenticPipelineService.getTask(taskId);
-    const progress = this.agenticPipelineService.getTaskProgress(taskId);
+    const task = this.taskOrchestrationService.getTask(taskId);
+    const progress = this.taskOrchestrationService.getTaskProgress(taskId);
 
     if (!task) {
       return 'Task not found';
     }
 
-    return `Task Status: ${task.status}\nProgress: ${progress?.current}/${progress?.total}\nCurrent Step: ${progress?.currentStep}`;
+    return `Task Status: ${task.status}\nProgress: ${progress?.progressPercentage || 0}% (${progress?.completedStages?.length || 0}/${progress?.totalStages || 0} stages)\nCurrent Stage: ${progress?.currentStage || 'Unknown'}`;
   }
 
   public getConversationSummary(): string {
@@ -1119,8 +1162,8 @@ Guidelines:
   }
 
   public async initializeRepoGrokking(): Promise<void> {
-    if (this.repoGrokkingService) {
-      await this.repoGrokkingService.initializeRepository();
+    if (this.repositoryAnalysisService) {
+      await this.repositoryAnalysisService.initializeRepository();
     }
   }
 
@@ -1233,8 +1276,8 @@ Consider the current project context and dependencies. Respond only with the mod
       console.log('Request payload:', {
         model: this.MODEL_NAME,
         messages: messages.map(m => ({ role: m.role, content: m.content.substring(0, 100) + '...' })),
-        temperature: 0.7,
-        max_tokens: 2048,
+        temperature: this.temperature,
+        max_tokens: this.maxTokens,
         top_p: 0.95
       });
 
@@ -1243,8 +1286,8 @@ Consider the current project context and dependencies. Respond only with the mod
         {
           model: this.MODEL_NAME,
           messages,
-          temperature: 0.7,
-          max_tokens: 2048,
+          temperature: this.temperature,
+          max_tokens: this.maxTokens,
           top_p: 0.95
         },
         {

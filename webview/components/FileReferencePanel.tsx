@@ -150,7 +150,7 @@ export const FileReferencePanel: React.FC<FileReferencePanelProps> = ({
                     <div key={index} className="file-item">
                         <div className="file-header" onClick={() => toggleFileExpansion(file.path)}>
                             <div className="file-info">
-                                <span className="file-icon">{getFileIcon(file.language)}</span>
+                                <span className="file-icon">{getFileIcon(file.language || 'text')}</span>
                                 <div className="file-details">
                                     <span className="file-name">{file.name}</span>
                                     <span className="file-path">{file.path}</span>
@@ -159,8 +159,7 @@ export const FileReferencePanel: React.FC<FileReferencePanelProps> = ({
 
                             <div className="file-meta">
                                 <span
-                                    className="language-tag"
-                                    style={{ backgroundColor: getLanguageColor(file.language) }}
+                                    className={`language-tag language-${(file.language || 'text').toLowerCase()}`}
                                 >
                                     {file.language}
                                 </span>

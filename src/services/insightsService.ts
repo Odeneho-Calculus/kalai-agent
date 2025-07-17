@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
-import { SemanticAnalysisService } from './semanticAnalysisService';
+import { SemanticService } from './semanticService';
 
 export interface RepositoryInsights {
     id: string;
@@ -747,21 +747,21 @@ export interface PredictiveRecommendation {
     confidence: number;
 }
 
-export class RepositoryInsightsService {
-    private repoGrokkingService: RepoGrokkingService;
+export class InsightsService {
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
-    private semanticAnalysisService: SemanticAnalysisService;
+    private semanticService: SemanticService;
     private insightsCache: Map<string, RepositoryInsights> = new Map();
     private trendsHistory: Map<string, any[]> = new Map();
 
     constructor(
-        repoGrokkingService: RepoGrokkingService,
+        repositoryAnalysisService: RepositoryAnalysisService,
         aiService: AIService,
-        semanticAnalysisService: SemanticAnalysisService
+        semanticService: SemanticService
     ) {
-        this.repoGrokkingService = repoGrokkingService;
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
-        this.semanticAnalysisService = semanticAnalysisService;
+        this.semanticService = semanticService;
     }
 
     /**
@@ -875,13 +875,13 @@ export class RepositoryInsightsService {
      * Analyze technical debt
      */
     private async analyzeTechnicalDebt(repositoryPath: string): Promise<TechnicalDebtAnalysis> {
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
         const debtItems: DebtItem[] = [];
         const debtByFile: DebtByFile[] = [];
         const debtByCategory: { [category: string]: number } = {};
 
         for (const file of sourceFiles) {
-            const analysis = await this.semanticAnalysisService.analyzeFile(file);
+            const analysis = await this.semanticService.analyzeFile(file);
             const fileDebt = this.calculateFileDebt(analysis);
 
             debtByFile.push({
@@ -918,7 +918,7 @@ export class RepositoryInsightsService {
      * Analyze code quality
      */
     private async analyzeCodeQuality(repositoryPath: string): Promise<CodeQualityMetrics> {
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
         const qualityMetrics: CodeQualityMetrics = {
             overallScore: 0,
             maintainabilityIndex: 0,
@@ -968,7 +968,7 @@ export class RepositoryInsightsService {
 
         // Analyze each file and aggregate metrics
         for (const file of sourceFiles) {
-            const analysis = await this.semanticAnalysisService.analyzeFile(file);
+            const analysis = await this.semanticService.analyzeFile(file);
             this.aggregateQualityMetrics(qualityMetrics, analysis);
         }
 
@@ -983,7 +983,7 @@ export class RepositoryInsightsService {
      * Assess maintainability
      */
     private async assessMaintainability(repositoryPath: string): Promise<MaintainabilityAssessment> {
-        const projectAnalysis = await this.semanticAnalysisService.analyzeProject(repositoryPath);
+        const projectAnalysis = await this.semanticService.analyzeProject(repositoryPath);
 
         const factors: MaintainabilityFactor[] = [
             {
@@ -1040,7 +1040,7 @@ export class RepositoryInsightsService {
      * Analyze security issues
      */
     private async analyzeSecurityIssues(repositoryPath: string): Promise<SecurityAnalysis> {
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
         const vulnerabilities: SecurityVulnerability[] = [];
 
         // Analyze each file for security issues
@@ -1069,13 +1069,13 @@ export class RepositoryInsightsService {
      * Analyze performance
      */
     private async analyzePerformance(repositoryPath: string): Promise<PerformanceAnalysis> {
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
         const bottlenecks: PerformanceBottleneck[] = [];
         const optimization: OptimizationOpportunity[] = [];
 
         // Analyze each file for performance issues
         for (const file of sourceFiles) {
-            const analysis = await this.semanticAnalysisService.analyzeFile(file);
+            const analysis = await this.semanticService.analyzeFile(file);
             const fileBottlenecks = await this.identifyPerformanceBottlenecks(analysis.filePath || '');
             const fileOptimizations = this.identifyOptimizationOpportunities(analysis);
 
@@ -1100,7 +1100,7 @@ export class RepositoryInsightsService {
      * Analyze testability
      */
     private async analyzeTestability(repositoryPath: string): Promise<TestabilityAnalysis> {
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
         const testSmells: TestSmell[] = [];
         const testGaps: TestGap[] = [];
 
@@ -1139,8 +1139,8 @@ export class RepositoryInsightsService {
      * Analyze architecture
      */
     private async analyzeArchitecture(repositoryPath: string): Promise<ArchitectureInsights> {
-        const projectAnalysis = await this.semanticAnalysisService.analyzeProject(repositoryPath);
-        const dependencyGraph = await this.semanticAnalysisService.buildProjectDependencyGraph(repositoryPath);
+        const projectAnalysis = await this.semanticService.analyzeProject(repositoryPath);
+        const dependencyGraph = await this.semanticService.buildProjectDependencyGraph(repositoryPath);
 
         const patterns = this.identifyArchitecturePatterns(projectAnalysis);
         const violations = this.identifyArchitectureViolations(projectAnalysis);
@@ -1311,8 +1311,8 @@ ${insights.recommendations.slice(0, 5).map(r => `- ${r.title}`).join('\n')}
     }
 
     private async getTotalLinesOfCode(repositoryPath: string): Promise<number> {
-        if (this.repoGrokkingService) {
-            const stats = await this.repoGrokkingService.getRepositoryStats();
+        if (this.repositoryAnalysisService) {
+            const stats = await this.repositoryAnalysisService.getRepositoryStats();
             return stats.totalLines;
         }
         return 10000; // Mock value

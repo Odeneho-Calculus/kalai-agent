@@ -597,6 +597,48 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "Kalai Agent",
+      "properties": {
+        "kalai-agent.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenRouter API key for AI model access (Optional: Extension includes default key for immediate use)",
+          "scope": "application"
+        },
+        "kalai-agent.modelName": {
+          "type": "string",
+          "default": "qwen/qwen-2.5-7b-instruct:free",
+          "description": "AI model to use for code generation and analysis",
+          "enum": [
+            "qwen/qwen-2.5-7b-instruct:free",
+            "gpt-4-turbo",
+            "gpt-4",
+            "gpt-3.5-turbo",
+            "claude-3-opus",
+            "claude-3-sonnet",
+            "gemini-pro"
+          ]
+        },
+        "kalai-agent.apiEndpoint": {
+          "type": "string",
+          "default": "https://openrouter.ai/api/v1/chat/completions",
+          "description": "API endpoint for the AI service"
+        },
+        "kalai-agent.maxTokens": {
+          "type": "number",
+          "default": 2048,
+          "description": "Maximum tokens for AI responses"
+        },
+        "kalai-agent.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Temperature for AI responses (0-2)"
+        }
+      }
     }
   },
   "scripts": {

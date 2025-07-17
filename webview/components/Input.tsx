@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './ModernInput.css';
+import './Input.css';
 
-interface ModernInputProps {
+interface InputProps {
     onSendMessage: (content: string, files?: string[]) => void;
     disabled?: boolean;
     placeholder?: string;
 }
 
-export const ModernInput: React.FC<ModernInputProps> = ({
+export const Input: React.FC<InputProps> = ({
     onSendMessage,
     disabled = false,
     placeholder = "Type your message..."

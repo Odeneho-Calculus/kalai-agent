@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
-import { ValidationFrameworkService } from './validationFrameworkService';
+import { ValidationService } from './validationService';
 
 export interface TestSuite {
     id: string;
@@ -105,9 +105,9 @@ export interface PerformanceTrend {
 }
 
 export class TestingService {
-    private repoGrokkingService: RepoGrokkingService;
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
-    private validationService: ValidationFrameworkService;
+    private validationService: ValidationService;
 
     private testSuites: Map<string, TestSuite> = new Map();
     private performanceBenchmarks: Map<string, PerformanceBenchmark> = new Map();
@@ -115,11 +115,11 @@ export class TestingService {
     private isRunning = false;
 
     constructor(
-        repoGrokkingService: RepoGrokkingService,
+        repositoryAnalysisService: RepositoryAnalysisService,
         aiService: AIService,
-        validationService: ValidationFrameworkService
+        validationService: ValidationService
     ) {
-        this.repoGrokkingService = repoGrokkingService;
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
         this.validationService = validationService;
     }
@@ -731,7 +731,7 @@ Return only the test code.
 
         // Generate integration tests based on file dependencies
         for (const file of files) {
-            const dependencies = await this.repoGrokkingService.getFileDependencies(file);
+            const dependencies = await this.repositoryAnalysisService.getFileDependencies(file);
 
             tests.push({
                 id: this.generateId(),
@@ -821,9 +821,9 @@ The test should simulate real user interactions and verify the complete workflow
 
     private async analyzeProject(projectPath: string): Promise<any> {
         return {
-            files: await this.repoGrokkingService.getSourceFiles(),
-            dependencies: await this.repoGrokkingService.getProjectDependencies(),
-            structure: await this.repoGrokkingService.getProjectStructure()
+            files: await this.repositoryAnalysisService.getSourceFiles(),
+            dependencies: await this.repositoryAnalysisService.getProjectDependencies(),
+            structure: await this.repositoryAnalysisService.getProjectStructure()
         };
     }
 

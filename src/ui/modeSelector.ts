@@ -162,8 +162,8 @@ export class ModeSelector {
         }
 
         if (mode.id === 'coffee-mode') {
-            if (!capabilities.agenticPipeline) {
-                missingRequirements.push('Agentic pipeline not available');
+            if (!capabilities.taskOrchestration) {
+                missingRequirements.push('Task orchestration not available');
             }
             if (!capabilities.repoGrokking) {
                 missingRequirements.push('Repository grokking not available');

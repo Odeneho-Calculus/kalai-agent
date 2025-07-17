@@ -99,7 +99,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 
         return (
             <div className="message-content">
-                {parts.map((part, index) => {
+                {parts.map((part: string, index: number) => {
                     if (part.startsWith('```') && part.endsWith('```')) {
                         const lines = part.slice(3, -3).split('\n');
                         const language = lines[0].trim();

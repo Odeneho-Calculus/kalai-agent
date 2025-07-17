@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AIService } from './aiService';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 
 export interface ModelProvider {
     id: string;
@@ -226,18 +226,18 @@ export interface ActualPerformance {
     satisfaction: number;
 }
 
-export class MultiModelService {
+export class ModelService {
     private models: Map<string, ModelProvider> = new Map();
     private routingStrategy: ModelRoutingStrategy;
     private performanceHistory: Map<string, ModelPerformanceHistory> = new Map();
     private aiService: AIService;
-    private repoGrokkingService: RepoGrokkingService;
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private requestHistory: Map<string, ModelRequest> = new Map();
     private responseCache: Map<string, ModelResponse> = new Map();
 
-    constructor(aiService: AIService, repoGrokkingService: RepoGrokkingService) {
+    constructor(aiService: AIService, repositoryAnalysisService: RepositoryAnalysisService) {
         this.aiService = aiService;
-        this.repoGrokkingService = repoGrokkingService;
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.routingStrategy = this.getDefaultRoutingStrategy();
         this.initializeModels();
     }

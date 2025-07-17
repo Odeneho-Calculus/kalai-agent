@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
 
 export interface SemanticAnalysis {
@@ -341,14 +341,14 @@ export interface CodeImprovementLocation {
     class?: string;
 }
 
-export class SemanticAnalysisService {
-    private repoGrokkingService: RepoGrokkingService;
+export class SemanticService {
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
     private analysisCache: Map<string, SemanticAnalysis> = new Map();
     private astCache: Map<string, any> = new Map();
 
-    constructor(repoGrokkingService: RepoGrokkingService, aiService: AIService) {
-        this.repoGrokkingService = repoGrokkingService;
+    constructor(repositoryAnalysisService: RepositoryAnalysisService, aiService: AIService) {
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
     }
 
@@ -392,7 +392,7 @@ export class SemanticAnalysisService {
         architectureAnalysis: ArchitectureAnalysis;
         crossFilePatterns: CrossFilePattern[];
     }> {
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
         const analyses: SemanticAnalysis[] = [];
 
         // Analyze each file
@@ -420,7 +420,7 @@ export class SemanticAnalysisService {
      * Build comprehensive dependency graph for the project
      */
     public async buildProjectDependencyGraph(projectPath: string): Promise<DependencyGraph> {
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
         const nodes: DependencyNode[] = [];
         const edges: DependencyEdge[] = [];
 

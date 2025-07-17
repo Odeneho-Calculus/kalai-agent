@@ -2,73 +2,73 @@ import * as vscode from 'vscode';
 import { ChatViewProvider } from './providers/chatViewProvider';
 import { AdvancedCommands } from './commands/advancedCommands';
 import { handleEditWithAI } from './commands/editWithAI';
-import { RepoGrokkingService } from './services/repoGrokkingService';
-import { AgenticPipelineService } from './services/agenticPipelineService';
+import { RepositoryAnalysisService } from './services/repositoryAnalysisService';
+import { TaskOrchestrationService } from './services/taskOrchestrationService';
 import { AIService } from './services/aiService';
 import { WebSearchService } from './services/webSearchService';
 import { StatusBarManager } from './ui/statusBarManager';
 import { ProgressIndicator } from './ui/progressIndicator';
 import { ModeSelector } from './ui/modeSelector';
 import { ChatEnhancements } from './ui/chatEnhancements';
-import { MultiFileOperationsService } from './services/multiFileOperationsService';
-import { ValidationFrameworkService } from './services/validationFrameworkService';
-import { CoffeeModeService } from './services/coffeeModeService';
+import { FileOperationsService } from './services/fileOperationsService';
+import { ValidationService } from './services/validationService';
+import { AutomationService } from './services/automationService';
 import { RealTimeFeedbackUI } from './ui/realTimeFeedbackUI';
 import { TestingService } from './services/testingService';
-import { PerformanceMonitoringService } from './services/performanceMonitoringService';
-import { SemanticAnalysisService } from './services/semanticAnalysisService';
-import { RepositoryInsightsService } from './services/repositoryInsightsService';
-import { MultiModelService } from './services/multiModelService';
-import { TeamCollaborationService } from './services/teamCollaborationService';
-import { ExtensibilityService } from './services/extensibilityService';
-import { EnterpriseIntegrationService } from './services/enterpriseIntegrationService';
+import { PerformanceService } from './services/performanceService';
+import { SemanticService } from './services/semanticService';
+import { InsightsService } from './services/insightsService';
+import { ModelService } from './services/modelService';
+import { CollaborationService } from './services/collaborationService';
+import { PluginService } from './services/pluginService';
+import { IntegrationService } from './services/integrationService';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('🚀 Kalai Agent with Repo Grokking™ is now active!');
 
   // Initialize enhanced services
-  const repoGrokkingService = new RepoGrokkingService();
+  const repositoryAnalysisService = new RepositoryAnalysisService();
   const webSearchService = new WebSearchService();
-  const agenticPipelineService = new AgenticPipelineService(new AIService(), repoGrokkingService);
-  const enhancedAIService = new AIService(repoGrokkingService, agenticPipelineService, webSearchService);
+  const taskOrchestrationService = new TaskOrchestrationService(repositoryAnalysisService, new AIService());
+  const enhancedAIService = new AIService(repositoryAnalysisService, taskOrchestrationService, webSearchService);
 
   // Initialize Phase 3 services
-  const validationFrameworkService = new ValidationFrameworkService(repoGrokkingService, enhancedAIService);
-  const multiFileOperationsService = new MultiFileOperationsService(repoGrokkingService, enhancedAIService);
+  const validationService = new ValidationService(repositoryAnalysisService, enhancedAIService);
+  const fileOperationsService = new FileOperationsService(repositoryAnalysisService, enhancedAIService);
 
   // Initialize Phase 4 services
-  const coffeeModeService = new CoffeeModeService(
-    repoGrokkingService,
+  const automationService = new AutomationService(
+    repositoryAnalysisService,
     enhancedAIService,
-    agenticPipelineService,
-    validationFrameworkService,
-    multiFileOperationsService
+    taskOrchestrationService,
+    validationService,
+    fileOperationsService
   );
 
   // Initialize Phase 5 services
-  const testingService = new TestingService(repoGrokkingService, enhancedAIService, validationFrameworkService);
-  const performanceMonitoringService = new PerformanceMonitoringService(repoGrokkingService);
+  const testingService = new TestingService(repositoryAnalysisService, enhancedAIService, validationService);
+  const performanceService = new PerformanceService(repositoryAnalysisService);
 
   // Initialize Phase 6 services
-  const semanticAnalysisService = new SemanticAnalysisService(repoGrokkingService, enhancedAIService);
-  const repositoryInsightsService = new RepositoryInsightsService(
-    repoGrokkingService,
+  const semanticService = new SemanticService(repositoryAnalysisService, enhancedAIService);
+  const insightsService = new InsightsService(
+    repositoryAnalysisService,
     enhancedAIService,
-    semanticAnalysisService
+    semanticService
   );
 
   // Initialize Phase 7 services
-  const multiModelService = new MultiModelService(enhancedAIService, repoGrokkingService);
-  const teamCollaborationService = new TeamCollaborationService(repoGrokkingService, enhancedAIService);
-  const extensibilityService = new ExtensibilityService(repoGrokkingService, enhancedAIService, context);
-  const enterpriseIntegrationService = new EnterpriseIntegrationService(repoGrokkingService, enhancedAIService);
+  const modelService = new ModelService(enhancedAIService, repositoryAnalysisService);
+  const collaborationService = new CollaborationService(repositoryAnalysisService, enhancedAIService);
+  const pluginService = new PluginService(repositoryAnalysisService, enhancedAIService, context);
+  const integrationService = new IntegrationService(repositoryAnalysisService, enhancedAIService);
 
   // Initialize UI components
   const statusBarManager = new StatusBarManager(enhancedAIService);
   const progressIndicator = new ProgressIndicator();
   const modeSelector = new ModeSelector(enhancedAIService);
   const chatEnhancements = new ChatEnhancements(enhancedAIService);
-  const realTimeFeedbackUI = new RealTimeFeedbackUI(enhancedAIService, validationFrameworkService, coffeeModeService);
+  const realTimeFeedbackUI = new RealTimeFeedbackUI(enhancedAIService, validationService, automationService);
 
   // Initialize advanced commands with enhanced services
   const advancedCommands = new AdvancedCommands(enhancedAIService);
@@ -216,7 +216,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (workspaceFolder) {
           const targetDir = workspaceFolder.uri.fsPath;
           try {
-            const task = await multiFileOperationsService.generateMultiFileCode(prompt, targetDir, {
+            const task = await fileOperationsService.generateMultiFileCode(prompt, targetDir, {
               followPatterns: true,
               maintainConsistency: true,
               generateTests: true,
@@ -249,7 +249,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       if (refactoringType) {
         try {
-          const task = await multiFileOperationsService.performAdvancedRefactoring({
+          const task = await fileOperationsService.performAdvancedRefactoring({
             targetFiles: [editor.document.uri.fsPath],
             refactoringType: refactoringType as any,
             parameters: {},
@@ -271,7 +271,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       try {
-        const validation = await validationFrameworkService.validateCode(editor.document.uri.fsPath);
+        const validation = await validationService.validateCode(editor.document.uri.fsPath);
         const message = validation.isValid
           ? 'Code validation passed!'
           : `Code validation found ${validation.errors.length} errors`;
@@ -298,7 +298,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       try {
-        const validation = await validationFrameworkService.validateCode(editor.document.uri.fsPath);
+        const validation = await validationService.validateCode(editor.document.uri.fsPath);
         const fixableErrors = validation.errors.filter(error => error.fixable);
 
         if (fixableErrors.length === 0) {
@@ -313,7 +313,7 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         if (result === 'Apply Fixes') {
-          const { fixedErrors, appliedFixes } = await validationFrameworkService.autoFixErrors(
+          const { fixedErrors, appliedFixes } = await validationService.autoFixErrors(
             editor.document.uri.fsPath,
             fixableErrors
           );
@@ -328,7 +328,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Phase 4 commands - Coffee Mode
     vscode.commands.registerCommand('kalai-agent.enableCoffeeMode', async () => {
       try {
-        await coffeeModeService.enableCoffeeMode();
+        await automationService.enableCoffeeMode();
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to enable Coffee Mode: ${error}`);
       }
@@ -336,14 +336,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.commands.registerCommand('kalai-agent.disableCoffeeMode', async () => {
       try {
-        await coffeeModeService.disableCoffeeMode();
+        await automationService.disableCoffeeMode();
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to disable Coffee Mode: ${error}`);
       }
     }),
 
     vscode.commands.registerCommand('kalai-agent.showCoffeeModeStatus', async () => {
-      const status = coffeeModeService.getStatus();
+      const status = automationService.getStatus();
       const message = `Coffee Mode Status:
 - Enabled: ${status.enabled}
 - Running: ${status.isRunning}
@@ -355,7 +355,7 @@ export function activate(context: vscode.ExtensionContext) {
     }),
 
     vscode.commands.registerCommand('kalai-agent.viewCoffeeModeTask', async (taskId: string) => {
-      const task = coffeeModeService.getActiveTasks().find(t => t.id === taskId);
+      const task = automationService.getActiveTasks().find(t => t.id === taskId);
       if (task) {
         const message = `Coffee Mode Task: ${task.name}
 Description: ${task.description}
@@ -509,7 +509,7 @@ ${results.failureDetails.length > 0 ? `\nFailures:\n${results.failureDetails.map
 
     vscode.commands.registerCommand('kalai-agent.startPerformanceMonitoring', () => {
       try {
-        performanceMonitoringService.startMonitoring();
+        performanceService.startMonitoring();
         vscode.window.showInformationMessage('Performance monitoring started');
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to start performance monitoring: ${error}`);
@@ -518,7 +518,7 @@ ${results.failureDetails.length > 0 ? `\nFailures:\n${results.failureDetails.map
 
     vscode.commands.registerCommand('kalai-agent.stopPerformanceMonitoring', () => {
       try {
-        performanceMonitoringService.stopMonitoring();
+        performanceService.stopMonitoring();
         vscode.window.showInformationMessage('Performance monitoring stopped');
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to stop performance monitoring: ${error}`);
@@ -526,7 +526,7 @@ ${results.failureDetails.length > 0 ? `\nFailures:\n${results.failureDetails.map
     }),
 
     vscode.commands.registerCommand('kalai-agent.showPerformanceReport', async () => {
-      const status = performanceMonitoringService.getPerformanceStatus();
+      const status = performanceService.getPerformanceStatus();
       const message = `Performance Status: ${status.status.toUpperCase()}
 Active Alerts: ${status.activeAlerts.length}
 Uptime: ${Math.round(status.uptime / 1000)}s
@@ -544,7 +544,7 @@ ${status.metrics ? `Current Metrics:
       const endTime = new Date();
 
       try {
-        const report = await performanceMonitoringService.generatePerformanceReport(startTime, endTime);
+        const report = await performanceService.generatePerformanceReport(startTime, endTime);
         const message = `Performance Report Generated:
 Period: ${report.period.start.toLocaleString()} - ${report.period.end.toLocaleString()}
 Total Requests: ${report.summary.totalRequests}
@@ -570,7 +570,7 @@ Recommendations: ${report.recommendations.length}`;
       }
 
       try {
-        const analysis = await semanticAnalysisService.analyzeFile(editor.document.uri.fsPath);
+        const analysis = await semanticService.analyzeFile(editor.document.uri.fsPath);
         const message = `Semantic Analysis Complete:
 Functions: ${analysis.astAnalysis.functions.length}
 Classes: ${analysis.astAnalysis.classes.length}
@@ -602,7 +602,7 @@ Suggestions: ${analysis.suggestedImprovements.length}`;
       }
 
       try {
-        const report = await semanticAnalysisService.analyzeCodeQuality(editor.document.uri.fsPath);
+        const report = await semanticService.analyzeCodeQuality(editor.document.uri.fsPath);
         const message = `Code Quality Report:
 Overall Score: ${report.overallScore}/100
 Maintainability: ${report.maintainabilityScore}/100
@@ -635,13 +635,13 @@ Recommendations: ${report.recommendations.length}`;
         progress.report({ increment: 0, message: 'Analyzing repository structure...' });
 
         try {
-          const insights = await repositoryInsightsService.generateRepositoryInsights(
+          const insights = await insightsService.generateRepositoryInsights(
             workspaceFolder.uri.fsPath
           );
 
           progress.report({ increment: 100, message: 'Complete!' });
 
-          const summary = repositoryInsightsService.getInsightsSummary(insights);
+          const summary = insightsService.getInsightsSummary(insights);
           vscode.window.showInformationMessage(
             `Repository insights generated successfully!`,
             'View Summary',
@@ -660,7 +660,7 @@ Recommendations: ${report.recommendations.length}`;
     }),
 
     vscode.commands.registerCommand('kalai-agent.showRepositoryInsights', async (insightsId: string) => {
-      const insights = repositoryInsightsService.getRepositoryInsights(insightsId);
+      const insights = insightsService.getRepositoryInsights(insightsId);
       if (!insights) {
         vscode.window.showErrorMessage('Repository insights not found');
         return;
@@ -695,7 +695,7 @@ ${insights.recommendations.slice(0, 3).map(r => `- ${r.title} (${r.priority})`).
       ));
 
       try {
-        const suggestions = await semanticAnalysisService.generateContextualSuggestions(
+        const suggestions = await semanticService.generateContextualSuggestions(
           editor.document.uri.fsPath,
           line,
           column,
@@ -734,8 +734,8 @@ ${insights.recommendations.slice(0, 3).map(r => `- ${r.title} (${r.priority})`).
 
     vscode.commands.registerCommand('kalai-agent.clearAnalysisCache', () => {
       try {
-        semanticAnalysisService.clearCache();
-        repositoryInsightsService.clearCache();
+        semanticService.clearCache();
+        insightsService.clearCache();
         vscode.window.showInformationMessage('Analysis cache cleared successfully');
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to clear cache: ${error}`);
@@ -743,13 +743,13 @@ ${insights.recommendations.slice(0, 3).map(r => `- ${r.title} (${r.priority})`).
     }),
 
     vscode.commands.registerCommand('kalai-agent.showAnalysisStats', async () => {
-      const stats = semanticAnalysisService.getAnalysisStats();
+      const stats = semanticService.getAnalysisStats();
       const message = `Analysis Statistics:
 Cached Analyses: ${stats.cachedAnalyses}
 Cached ASTs: ${stats.cachedASTs}
 Cache Hit Rate: ${(stats.cacheHitRate * 100).toFixed(1)}%
 
-Performance Monitoring: ${performanceMonitoringService.getPerformanceStatus().status}
+Performance Monitoring: ${performanceService.getPerformanceStatus().status}
 Testing Service: ${testingService.getStatus().totalSuites} test suites`;
 
       vscode.window.showInformationMessage(message, { modal: true });
@@ -757,7 +757,7 @@ Testing Service: ${testingService.getStatus().totalSuites} test suites`;
 
     // Phase 7 commands - Enterprise Features
     vscode.commands.registerCommand('kalai-agent.switchAIModel', async () => {
-      const availableModels = multiModelService.getAvailableModels();
+      const availableModels = modelService.getAvailableModels();
       const modelOptions = availableModels.map(model => ({
         label: model.name,
         description: `${model.performance.speed} speed, ${Math.round(model.performance.accuracy * 100)}% accuracy`,
@@ -781,7 +781,7 @@ Testing Service: ${testingService.getStatus().totalSuites} test suites`;
     }),
 
     vscode.commands.registerCommand('kalai-agent.showModelPerformance', async () => {
-      const performanceHistory = multiModelService.getModelPerformanceHistory();
+      const performanceHistory = modelService.getModelPerformanceHistory();
       if (performanceHistory.length === 0) {
         vscode.window.showInformationMessage('No model performance data available');
         return;
@@ -837,7 +837,7 @@ Use Command Palette > "Kalai: Switch AI Model" to change models`;
 
           switch (shareOptions) {
             case 'Share with Team':
-              const context = await teamCollaborationService.shareContext(
+              const context = await collaborationService.shareContext(
                 vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '',
                 'code-selection',
                 contextContent,
@@ -848,7 +848,7 @@ Use Command Palette > "Kalai: Switch AI Model" to change models`;
               break;
 
             case 'Create Code Review Session':
-              const reviewSession = await teamCollaborationService.createCodeReviewSession(
+              const reviewSession = await collaborationService.createCodeReviewSession(
                 [editor.document.uri.fsPath],
                 ['team-member-1', 'team-member-2'], // Would get actual reviewers
                 'Code review for selected code'
@@ -857,7 +857,7 @@ Use Command Palette > "Kalai: Switch AI Model" to change models`;
               break;
 
             case 'Start Pair Programming':
-              const pairSession = await teamCollaborationService.startCollaborationSession(
+              const pairSession = await collaborationService.startCollaborationSession(
                 'Pair Programming',
                 'Collaborative coding session',
                 'pair-programming',
@@ -868,7 +868,7 @@ Use Command Palette > "Kalai: Switch AI Model" to change models`;
               break;
 
             case 'Add to Knowledge Base':
-              const knowledgeItem = await teamCollaborationService.createKnowledgeItem(
+              const knowledgeItem = await collaborationService.createKnowledgeItem(
                 'Code Example',
                 `\`\`\`${editor.document.languageId}\n${selectedText}\n\`\`\``,
                 'pattern',
@@ -891,7 +891,7 @@ Use Command Palette > "Kalai: Switch AI Model" to change models`;
 
       if (query) {
         try {
-          const results = await teamCollaborationService.searchKnowledgeBase(query, {});
+          const results = await collaborationService.searchKnowledgeBase(query, {});
 
           if (results.length === 0) {
             vscode.window.showInformationMessage('No results found');
@@ -923,7 +923,7 @@ Use Command Palette > "Kalai: Switch AI Model" to change models`;
       const endDate = new Date();
 
       try {
-        const insights = await teamCollaborationService.generateTeamInsights('default-team', {
+        const insights = await collaborationService.generateTeamInsights('default-team', {
           start: startDate,
           end: endDate
         });
@@ -960,7 +960,7 @@ ${insights.recommendations.slice(0, 3).map(r => `- ${r.title}`).join('\n')}`;
     }),
 
     vscode.commands.registerCommand('kalai-agent.managePlugins', async () => {
-      const plugins = extensibilityService.getPlugins();
+      const plugins = pluginService.getPlugins();
       const pluginOptions = plugins.map(plugin => ({
         label: plugin.name,
         description: `v${plugin.version} - ${plugin.status.state}`,
@@ -992,11 +992,11 @@ ${insights.recommendations.slice(0, 3).map(r => `- ${r.title}`).join('\n')}`;
           try {
             switch (action) {
               case 'Activate':
-                await extensibilityService.activatePlugin(plugin.id);
+                await pluginService.activatePlugin(plugin.id);
                 vscode.window.showInformationMessage(`Activated ${plugin.name}`);
                 break;
               case 'Deactivate':
-                await extensibilityService.deactivatePlugin(plugin.id);
+                await pluginService.deactivatePlugin(plugin.id);
                 vscode.window.showInformationMessage(`Deactivated ${plugin.name}`);
                 break;
               case 'Show Info':
@@ -1022,7 +1022,7 @@ ${plugin.description}`;
                   'Yes', 'No'
                 );
                 if (confirm === 'Yes') {
-                  await extensibilityService.uninstallPlugin(plugin.id);
+                  await pluginService.uninstallPlugin(plugin.id);
                   vscode.window.showInformationMessage(`Uninstalled ${plugin.name}`);
                 }
                 break;
@@ -1056,7 +1056,7 @@ ${plugin.description}`;
                 }
               });
               if (fileUri && fileUri[0]) {
-                await extensibilityService.installPlugin(fileUri[0].fsPath, 'local');
+                await pluginService.installPlugin(fileUri[0].fsPath, 'local');
                 vscode.window.showInformationMessage('Plugin installed successfully');
               }
               break;
@@ -1067,7 +1067,7 @@ ${plugin.description}`;
                 prompt: 'Plugin URL'
               });
               if (url) {
-                await extensibilityService.installPlugin(url, 'remote');
+                await pluginService.installPlugin(url, 'remote');
                 vscode.window.showInformationMessage('Plugin installed successfully');
               }
               break;
@@ -1083,7 +1083,7 @@ ${plugin.description}`;
     }),
 
     vscode.commands.registerCommand('kalai-agent.manageIntegrations', async () => {
-      const integrations = enterpriseIntegrationService.getIntegrations();
+      const integrations = integrationService.getIntegrations();
       const integrationOptions = integrations.map(integration => ({
         label: integration.name,
         description: `${integration.type.provider} - ${integration.status.state}`,
@@ -1121,18 +1121,18 @@ ${plugin.description}`;
                   password: true
                 });
                 if (credentials) {
-                  await enterpriseIntegrationService.connectIntegration(integration.id, { token: credentials });
+                  await integrationService.connectIntegration(integration.id, { token: credentials });
                   vscode.window.showInformationMessage(`Connected to ${integration.name}`);
                 }
                 break;
 
               case 'Disconnect':
-                await enterpriseIntegrationService.disconnectIntegration(integration.id);
+                await integrationService.disconnectIntegration(integration.id);
                 vscode.window.showInformationMessage(`Disconnected from ${integration.name}`);
                 break;
 
               case 'Test Connection':
-                await enterpriseIntegrationService.checkIntegrationHealth(integration.id);
+                await integrationService.checkIntegrationHealth(integration.id);
                 vscode.window.showInformationMessage(`Connection test completed for ${integration.name}`);
                 break;
 
@@ -1174,7 +1174,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
                   'Yes', 'No'
                 );
                 if (confirm === 'Yes') {
-                  await enterpriseIntegrationService.removeIntegration(integration.id);
+                  await integrationService.removeIntegration(integration.id);
                   vscode.window.showInformationMessage(`Removed ${integration.name}`);
                 }
                 break;
@@ -1187,7 +1187,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
     }),
 
     vscode.commands.registerCommand('kalai-agent.triggerCIPipeline', async () => {
-      const cicdIntegrations = enterpriseIntegrationService.getIntegrationsByCategory('cicd');
+      const cicdIntegrations = integrationService.getIntegrationsByCategory('cicd');
 
       if (cicdIntegrations.length === 0) {
         vscode.window.showErrorMessage('No CI/CD integrations configured');
@@ -1218,7 +1218,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
 
         if (pipelineId) {
           try {
-            const result = await enterpriseIntegrationService.triggerPipeline(
+            const result = await integrationService.triggerPipeline(
               selected.id,
               pipelineId,
               {}
@@ -1232,7 +1232,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
     }),
 
     vscode.commands.registerCommand('kalai-agent.sendTeamNotification', async () => {
-      const collaborationIntegrations = enterpriseIntegrationService.getIntegrationsByCategory('collaboration');
+      const collaborationIntegrations = integrationService.getIntegrationsByCategory('collaboration');
 
       if (collaborationIntegrations.length === 0) {
         vscode.window.showErrorMessage('No collaboration integrations configured');
@@ -1269,7 +1269,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
 
           if (message) {
             try {
-              await enterpriseIntegrationService.sendNotification(
+              await integrationService.sendNotification(
                 selected.id,
                 channel,
                 message,
@@ -1285,7 +1285,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
     }),
 
     vscode.commands.registerCommand('kalai-agent.runSecurityScan', async () => {
-      const securityIntegrations = enterpriseIntegrationService.getIntegrationsByCategory('security');
+      const securityIntegrations = integrationService.getIntegrationsByCategory('security');
 
       if (securityIntegrations.length === 0) {
         vscode.window.showErrorMessage('No security integrations configured');
@@ -1318,7 +1318,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
           const target = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '.';
 
           try {
-            const result = await enterpriseIntegrationService.runSecurityScan(
+            const result = await integrationService.runSecurityScan(
               selected.id,
               target,
               scanType.toLowerCase().replace(' ', '-')
@@ -1332,7 +1332,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
     }),
 
     vscode.commands.registerCommand('kalai-agent.showCloudResources', async () => {
-      const cloudIntegrations = enterpriseIntegrationService.getIntegrationsByCategory('cloud');
+      const cloudIntegrations = integrationService.getIntegrationsByCategory('cloud');
 
       if (cloudIntegrations.length === 0) {
         vscode.window.showErrorMessage('No cloud integrations configured');
@@ -1357,7 +1357,7 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
 
       if (selected) {
         try {
-          const resources = await enterpriseIntegrationService.getCloudResources(selected.id);
+          const resources = await integrationService.getCloudResources(selected.id);
           vscode.window.showInformationMessage(
             `Cloud resources: ${resources.instances?.length || 0} instances, Total: ${resources.total || 0}`,
             { modal: true }
@@ -1381,16 +1381,16 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
   // Add service disposal to subscriptions
   context.subscriptions.push({
     dispose: () => {
-      repoGrokkingService.dispose();
+      repositoryAnalysisService.dispose();
       statusBarManager.dispose();
       realTimeFeedbackUI.dispose();
-      performanceMonitoringService.dispose();
-      semanticAnalysisService.clearCache();
-      repositoryInsightsService.clearCache();
-      multiModelService.clearPerformanceHistory();
-      teamCollaborationService.clearAllData();
-      extensibilityService.clearAllData();
-      enterpriseIntegrationService.clearAllData();
+      performanceService.dispose();
+      semanticService.clearCache();
+      insightsService.clearCache();
+      modelService.clearPerformanceHistory();
+      collaborationService.clearAllData();
+      pluginService.clearAllData();
+      integrationService.clearAllData();
     }
   });
 }

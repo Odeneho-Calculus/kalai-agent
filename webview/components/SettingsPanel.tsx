@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import './ModernSettingsPanel.css';
+import './SettingsPanel.css';
 
 // Enhanced interfaces with comprehensive settings structure
 interface AIModelConfig {
@@ -73,7 +73,7 @@ interface AdvancedSettingsData {
     workspaceSettings: Record<string, any>;
 }
 
-interface ModernSettingsPanelProps {
+interface SettingsPanelProps {
     isVisible: boolean;
     onClose: () => void;
     onSettingsChange: (settings: Partial<AdvancedSettingsData>) => void;
@@ -146,7 +146,7 @@ const DEFAULT_SHORTCUTS = {
     'kalai-agent.refactorCode': 'Ctrl+Shift+R'
 };
 
-export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
+export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     isVisible,
     onClose,
     onSettingsChange,
@@ -471,6 +471,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="search-input"
+                            aria-label="Search settings"
+                            title="Search for specific settings"
                         />
                     </div>
                 </div>
@@ -519,6 +521,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                         value={settings.theme}
                                         onChange={(e) => handleSettingChange('theme', e.target.value as any)}
                                         className="setting-select"
+                                        aria-label="Theme selection"
+                                        title="Choose the color theme for the interface"
                                     >
                                         <option value="auto">🔄 Auto (Follow VS Code)</option>
                                         <option value="light">☀️ Light</option>
@@ -541,6 +545,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.fontSize}
                                             onChange={(e) => handleSettingChange('fontSize', parseInt(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Font size slider"
+                                            title="Adjust the font size for better readability"
                                         />
                                         <span className="range-value">{settings.fontSize}px</span>
                                     </div>
@@ -559,6 +565,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                         value={settings.fontFamily}
                                         onChange={(e) => handleSettingChange('fontFamily', e.target.value)}
                                         className="setting-select"
+                                        aria-label="Font family selection"
+                                        title="Choose your preferred coding font"
                                     >
                                         <option value="Consolas, Monaco, monospace">Consolas</option>
                                         <option value="'Fira Code', monospace">Fira Code</option>
@@ -579,6 +587,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.autoSave}
                                             onChange={(e) => handleSettingChange('autoSave', e.target.checked)}
+                                            aria-label="Auto save toggle"
+                                            title="Automatically save changes"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -600,6 +610,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                                 value={settings.autoSaveInterval}
                                                 onChange={(e) => handleSettingChange('autoSaveInterval', parseInt(e.target.value))}
                                                 className="setting-slider"
+                                                aria-label="Auto save interval slider"
+                                                title="Set how often to save automatically"
                                             />
                                             <span className="range-value">{settings.autoSaveInterval}s</span>
                                         </div>
@@ -617,6 +629,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.showLineNumbers}
                                             onChange={(e) => handleSettingChange('showLineNumbers', e.target.checked)}
+                                            aria-label="Show line numbers toggle"
+                                            title="Display line numbers in code blocks"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -633,6 +647,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.enableSuggestions}
                                             onChange={(e) => handleSettingChange('enableSuggestions', e.target.checked)}
+                                            aria-label="Enable suggestions toggle"
+                                            title="Show quick suggestion prompts"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -654,6 +670,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                                 value={settings.suggestionDelay}
                                                 onChange={(e) => handleSettingChange('suggestionDelay', parseInt(e.target.value))}
                                                 className="setting-slider"
+                                                aria-label="Suggestion delay slider"
+                                                title="Set delay before showing suggestions"
                                             />
                                             <span className="range-value">{settings.suggestionDelay}ms</span>
                                         </div>
@@ -682,6 +700,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                         value={settings.model}
                                         onChange={(e) => handleSettingChange('model', e.target.value)}
                                         className="setting-select"
+                                        aria-label="Primary AI model selection"
+                                        title="Select the primary AI model to use"
                                     >
                                         {AVAILABLE_MODELS.map(model => (
                                             <option key={model.id} value={model.id}>
@@ -723,6 +743,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.maxTokens}
                                             onChange={(e) => handleSettingChange('maxTokens', parseInt(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Max tokens slider"
+                                            title="Set maximum tokens for AI responses"
                                         />
                                         <span className="range-value">{settings.maxTokens.toLocaleString()}</span>
                                     </div>
@@ -746,6 +768,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.temperature}
                                             onChange={(e) => handleSettingChange('temperature', parseFloat(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Temperature slider"
+                                            title="Adjust AI creativity and randomness"
                                         />
                                         <span className="range-value">{settings.temperature}</span>
                                     </div>
@@ -771,6 +795,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.topP}
                                             onChange={(e) => handleSettingChange('topP', parseFloat(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Top P slider"
+                                            title="Nucleus sampling parameter"
                                         />
                                         <span className="range-value">{settings.topP}</span>
                                     </div>
@@ -791,6 +817,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.frequencyPenalty}
                                             onChange={(e) => handleSettingChange('frequencyPenalty', parseFloat(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Frequency penalty slider"
+                                            title="Reduce repetition in AI responses"
                                         />
                                         <span className="range-value">{settings.frequencyPenalty}</span>
                                     </div>
@@ -811,6 +839,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.presencePenalty}
                                             onChange={(e) => handleSettingChange('presencePenalty', parseFloat(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Presence penalty slider"
+                                            title="Encourage talking about new topics"
                                         />
                                         <span className="range-value">{settings.presencePenalty}</span>
                                     </div>
@@ -839,6 +869,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.performance.enableCaching}
                                             onChange={(e) => handleNestedSettingChange('performance', 'enableCaching', e.target.checked)}
+                                            aria-label="Enable caching toggle"
+                                            title="Enable caching for better performance"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -860,6 +892,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                                 value={settings.performance.cacheSize}
                                                 onChange={(e) => handleNestedSettingChange('performance', 'cacheSize', parseInt(e.target.value))}
                                                 className="setting-slider"
+                                                aria-label="Cache size slider"
+                                                title="Set maximum cache size in MB"
                                             />
                                             <span className="range-value">{settings.performance.cacheSize}MB</span>
                                         </div>
@@ -877,6 +911,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.performance.parallelProcessing}
                                             onChange={(e) => handleNestedSettingChange('performance', 'parallelProcessing', e.target.checked)}
+                                            aria-label="Parallel processing toggle"
+                                            title="Process multiple requests simultaneously"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -896,6 +932,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.performance.maxConcurrentRequests}
                                             onChange={(e) => handleNestedSettingChange('performance', 'maxConcurrentRequests', parseInt(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Max concurrent requests slider"
+                                            title="Set maximum number of concurrent requests"
                                         />
                                         <span className="range-value">{settings.performance.maxConcurrentRequests}</span>
                                     </div>
@@ -916,6 +954,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             value={settings.performance.requestTimeout}
                                             onChange={(e) => handleNestedSettingChange('performance', 'requestTimeout', parseInt(e.target.value))}
                                             className="setting-slider"
+                                            aria-label="Request timeout slider"
+                                            title="Set request timeout in milliseconds"
                                         />
                                         <span className="range-value">{Math.round(settings.performance.requestTimeout / 1000)}s</span>
                                     </div>
@@ -935,6 +975,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.performance.enableCompression}
                                             onChange={(e) => handleNestedSettingChange('performance', 'enableCompression', e.target.checked)}
+                                            aria-label="Enable compression toggle"
+                                            title="Compress data to reduce bandwidth usage"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -963,6 +1005,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.security.enableDataEncryption}
                                             onChange={(e) => handleNestedSettingChange('security', 'enableDataEncryption', e.target.checked)}
+                                            aria-label="Data encryption toggle"
+                                            title="Encrypt sensitive data at rest and in transit"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -979,6 +1023,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.security.allowTelemetry}
                                             onChange={(e) => handleNestedSettingChange('security', 'allowTelemetry', e.target.checked)}
+                                            aria-label="Allow telemetry toggle"
+                                            title="Send anonymous usage data to improve the extension"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -995,6 +1041,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.security.enableAuditLogging}
                                             onChange={(e) => handleNestedSettingChange('security', 'enableAuditLogging', e.target.checked)}
+                                            aria-label="Audit logging toggle"
+                                            title="Log all actions for security auditing"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1011,6 +1059,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.security.enableSandboxMode}
                                             onChange={(e) => handleNestedSettingChange('security', 'enableSandboxMode', e.target.checked)}
+                                            aria-label="Sandbox mode toggle"
+                                            title="Run AI operations in isolated environment"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1027,6 +1077,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.security.requireAuthentication}
                                             onChange={(e) => handleNestedSettingChange('security', 'requireAuthentication', e.target.checked)}
+                                            aria-label="Require authentication toggle"
+                                            title="Require authentication for sensitive operations"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1055,6 +1107,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.developer.enableDebugMode}
                                             onChange={(e) => handleNestedSettingChange('developer', 'enableDebugMode', e.target.checked)}
+                                            aria-label="Debug mode toggle"
+                                            title="Enable detailed debugging information"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1071,6 +1125,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.developer.showPerformanceMetrics}
                                             onChange={(e) => handleNestedSettingChange('developer', 'showPerformanceMetrics', e.target.checked)}
+                                            aria-label="Performance metrics toggle"
+                                            title="Display performance metrics in the UI"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1087,6 +1143,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.developer.enableExperimentalFeatures}
                                             onChange={(e) => handleNestedSettingChange('developer', 'enableExperimentalFeatures', e.target.checked)}
+                                            aria-label="Experimental features toggle"
+                                            title="Enable experimental and beta features"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1102,6 +1160,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                         value={settings.developer.logLevel}
                                         onChange={(e) => handleNestedSettingChange('developer', 'logLevel', e.target.value as any)}
                                         className="setting-select"
+                                        aria-label="Log level selection"
+                                        title="Select the logging level for debugging"
                                     >
                                         <option value="error">🔴 Error</option>
                                         <option value="warn">🟡 Warning</option>
@@ -1122,6 +1182,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.developer.enableHotReload}
                                             onChange={(e) => handleNestedSettingChange('developer', 'enableHotReload', e.target.checked)}
+                                            aria-label="Hot reload toggle"
+                                            title="Enable hot reload for development"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1165,6 +1227,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.integrations.enableGitIntegration}
                                             onChange={(e) => handleNestedSettingChange('integrations', 'enableGitIntegration', e.target.checked)}
+                                            aria-label="Git integration toggle"
+                                            title="Enable Git repository integration"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1181,6 +1245,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.integrations.enableJiraIntegration}
                                             onChange={(e) => handleNestedSettingChange('integrations', 'enableJiraIntegration', e.target.checked)}
+                                            aria-label="Jira integration toggle"
+                                            title="Connect with Jira for issue tracking"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1197,6 +1263,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.integrations.enableSlackIntegration}
                                             onChange={(e) => handleNestedSettingChange('integrations', 'enableSlackIntegration', e.target.checked)}
+                                            aria-label="Slack integration toggle"
+                                            title="Send notifications to Slack"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1213,6 +1281,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.integrations.enableTeamsIntegration}
                                             onChange={(e) => handleNestedSettingChange('integrations', 'enableTeamsIntegration', e.target.checked)}
+                                            aria-label="Teams integration toggle"
+                                            title="Send notifications to Microsoft Teams"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1229,6 +1299,8 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                             type="checkbox"
                                             checked={settings.integrations.enableCICD}
                                             onChange={(e) => handleNestedSettingChange('integrations', 'enableCICD', e.target.checked)}
+                                            aria-label="CI/CD integration toggle"
+                                            title="Integrate with CI/CD pipelines"
                                         />
                                         <span className="toggle-slider"></span>
                                     </label>
@@ -1294,7 +1366,9 @@ export const ModernSettingsPanel: React.FC<ModernSettingsPanelProps> = ({
                                                 type="file"
                                                 accept=".json"
                                                 onChange={handleImport}
-                                                style={{ display: 'none' }}
+                                                className="hidden-file-input"
+                                                aria-label="Import settings file"
+                                                title="Select a JSON file to import settings"
                                             />
                                         </label>
                                         <button className="action-btn danger" onClick={handleReset}>

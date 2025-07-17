@@ -1,13 +1,13 @@
 import React from 'react';
-import './ModernWelcome.css';
+import './Welcome.css';
 
-interface ModernWelcomeProps {
+interface WelcomeProps {
     onStartChat: () => void;
     onOpenSettings: () => void;
     onOpenContext: () => void;
 }
 
-export const ModernWelcome: React.FC<ModernWelcomeProps> = ({
+export const Welcome: React.FC<WelcomeProps> = ({
     onStartChat,
     onOpenSettings,
     onOpenContext

@@ -1,3 +1,5 @@
 {
-    "zencoder.enableRepoIndexing": true
+    "zencoder.enableRepoIndexing": true,
+    "kalai-agent.apiKey": "your-api-key-here",
+    "kalai-agent.modelName": "qwen/qwen-2.5-7b-instruct:free"
 }

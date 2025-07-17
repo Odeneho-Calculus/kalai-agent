@@ -92,8 +92,8 @@ Last Updated: December 2024
 src/
 ├── services/
 │   ├── aiService.ts              # Enhanced AI orchestration
-│   ├── repoGrokkingService.ts    # Repository analysis
-│   ├── agenticPipelineService.ts # Autonomous task execution
+│   ├── repositoryAnalysisService.ts # Repository analysis
+│   ├── executionService.ts       # Autonomous task execution
 │   └── webSearchService.ts       # Web search integration
 ├── ui/
 │   ├── statusBarManager.ts       # Status bar management

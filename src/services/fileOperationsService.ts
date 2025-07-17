@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
 
 export interface FileOperation {
@@ -29,14 +29,14 @@ export interface RefactoringContext {
     safetyChecks: boolean;
 }
 
-export class MultiFileOperationsService {
-    private repoGrokkingService: RepoGrokkingService;
+export class FileOperationsService {
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
     private activeTasks: Map<string, MultiFileTask> = new Map();
     private operationHistory: FileOperation[] = [];
 
-    constructor(repoGrokkingService: RepoGrokkingService, aiService: AIService) {
-        this.repoGrokkingService = repoGrokkingService;
+    constructor(repositoryAnalysisService: RepositoryAnalysisService, aiService: AIService) {
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
     }
 
@@ -70,7 +70,7 @@ export class MultiFileOperationsService {
         try {
             // Analyze target directory and existing patterns
             const directoryContext = await this.analyzeTargetDirectory(targetDirectory);
-            const projectPatterns = await this.repoGrokkingService.getProjectPatterns();
+            const projectPatterns = await this.repositoryAnalysisService.getProjectPatterns();
 
             // Generate code structure with AI
             const codeStructure = await this.generateCodeStructure(prompt, directoryContext, projectPatterns);
@@ -417,7 +417,7 @@ Use appropriate testing framework for ${language}.
 
         // Analyze each target file
         for (const filePath of context.targetFiles) {
-            const dependencies = await this.repoGrokkingService.getFileDependencies(filePath);
+            const dependencies = await this.repositoryAnalysisService.getFileDependencies(filePath);
             dependencies.forEach(dep => analysis.affectedFiles.add(dep));
         }
 
@@ -588,7 +588,7 @@ Return only the refactored code.
      */
     private async updateRepoIndex(operations: FileOperation[]): Promise<void> {
         const changedFiles = operations.map(op => op.filePath);
-        await this.repoGrokkingService.updateIndex(changedFiles);
+        await this.repositoryAnalysisService.updateIndex(changedFiles);
     }
 
     // Helper methods

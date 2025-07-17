@@ -6,3 +6,10 @@ out
 .DS_Store
 coverage
 *.log
+
+# Secure configuration files - DO NOT COMMIT
+src/config/secure.config.ts
+src/config/secure.config.js
+*.secure.*
+.env
+.env.local

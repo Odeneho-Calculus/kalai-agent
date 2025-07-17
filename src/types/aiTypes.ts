@@ -3,6 +3,10 @@ import { ProjectContext } from '../services/codeContextManager';
 export interface AIRequestContext extends ProjectContext {
     instruction?: string;
     repositoryPath?: string;
+    workspaceRoot?: string;
+    selectedText?: string;
+    language?: string;
+    framework?: string;
     fileContext?: any;
     requirements?: any;
     currentFile: {

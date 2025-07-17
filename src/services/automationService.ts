@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { RepoGrokkingService } from './repoGrokkingService';
+import { RepositoryAnalysisService } from './repositoryAnalysisService';
 import { AIService } from './aiService';
-import { AgenticPipelineService } from './agenticPipelineService';
-import { ValidationFrameworkService } from './validationFrameworkService';
-import { MultiFileOperationsService } from './multiFileOperationsService';
+import { TaskOrchestrationService } from './taskOrchestrationService';
+import { ValidationService } from './validationService';
+import { FileOperationsService } from './fileOperationsService';
 
 export interface CoffeeModeTask {
     id: string;
@@ -123,12 +123,12 @@ export interface MaintenanceNeed {
     effort: number; // in hours
 }
 
-export class CoffeeModeService {
-    private repoGrokkingService: RepoGrokkingService;
+export class AutomationService {
+    private repositoryAnalysisService: RepositoryAnalysisService;
     private aiService: AIService;
-    private agenticPipelineService: AgenticPipelineService;
-    private validationService: ValidationFrameworkService;
-    private multiFileService: MultiFileOperationsService;
+    private taskOrchestrationService: TaskOrchestrationService;
+    private validationService: ValidationService;
+    private fileOperationsService: FileOperationsService;
 
     private config: CoffeeModeConfig;
     private activeTasks: Map<string, CoffeeModeTask> = new Map();
@@ -137,17 +137,17 @@ export class CoffeeModeService {
     private currentAnalysis?: CoffeeModeAnalysis;
 
     constructor(
-        repoGrokkingService: RepoGrokkingService,
+        repositoryAnalysisService: RepositoryAnalysisService,
         aiService: AIService,
-        agenticPipelineService: AgenticPipelineService,
-        validationService: ValidationFrameworkService,
-        multiFileService: MultiFileOperationsService
+        taskOrchestrationService: TaskOrchestrationService,
+        validationService: ValidationService,
+        fileOperationsService: FileOperationsService
     ) {
-        this.repoGrokkingService = repoGrokkingService;
+        this.repositoryAnalysisService = repositoryAnalysisService;
         this.aiService = aiService;
-        this.agenticPipelineService = agenticPipelineService;
+        this.taskOrchestrationService = taskOrchestrationService;
         this.validationService = validationService;
-        this.multiFileService = multiFileService;
+        this.fileOperationsService = fileOperationsService;
 
         this.config = this.loadConfig();
         this.initializeCoffeeMode();
@@ -257,7 +257,7 @@ export class CoffeeModeService {
         };
 
         // Get all source files
-        const sourceFiles = await this.repoGrokkingService.getSourceFiles();
+        const sourceFiles = await this.repositoryAnalysisService.getSourceFiles();
 
         // Analyze each file
         for (const filePath of sourceFiles) {
@@ -558,7 +558,7 @@ Format as JSON with arrays for technicalDebt, optimizations, and maintenance.
 
         progress.report({ increment: 50, message: 'Executing refactoring...' });
 
-        const refactoringResult = await this.multiFileService.performAdvancedRefactoring(refactoringContext);
+        const refactoringResult = await this.fileOperationsService.performAdvancedRefactoring(refactoringContext);
 
         // Convert multi-file operations to Coffee Mode changes
         for (const operation of refactoringResult.operations) {

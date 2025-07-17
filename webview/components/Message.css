@@ -144,6 +144,11 @@
     word-break: break-word;
 }
 
+.message-text-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .message-text.streaming {
     position: relative;
 }

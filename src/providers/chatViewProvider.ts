@@ -4,7 +4,7 @@ import { getWebviewContent } from '../utils/getWebviewContent';
 import { AIService } from '../services/aiService';
 import { ChatHistoryService } from '../services/chatHistoryService';
 import { CodeContextManager, ProjectContext, FileContext } from '../services/codeContextManager';
-import { ContextSelectorService } from '../services/contextSelectorService';
+import { ContextSelectorService } from '../services/contextService';
 import { FileSearchService } from '../services/fileSearchService';
 import { WebSearchService } from '../services/webSearchService';
 import { AIRequestContext } from '../types/aiTypes';
