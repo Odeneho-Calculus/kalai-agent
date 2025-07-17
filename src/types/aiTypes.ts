@@ -2,6 +2,9 @@ import { ProjectContext } from '../services/codeContextManager';
 
 export interface AIRequestContext extends ProjectContext {
     instruction?: string;
+    repositoryPath?: string;
+    fileContext?: any;
+    requirements?: any;
     currentFile: {
         fileName: string;
         languageId: string;

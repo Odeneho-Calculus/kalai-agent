@@ -10,8 +10,8 @@ export class AdvancedCommands {
     private fileSearchService: FileSearchService;
     private webSearchService: WebSearchService;
 
-    constructor() {
-        this.aiService = new AIService();
+    constructor(aiService?: AIService) {
+        this.aiService = aiService || new AIService();
         this.codeContextManager = new CodeContextManager();
         this.fileSearchService = new FileSearchService();
         this.webSearchService = new WebSearchService();

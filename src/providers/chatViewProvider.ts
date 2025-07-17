@@ -36,9 +36,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
-    private readonly _context: vscode.ExtensionContext
+    private readonly _context: vscode.ExtensionContext,
+    aiService?: AIService
   ) {
-    this._aiService = new AIService();
+    this._aiService = aiService || new AIService();
     this._contextSelector = new ContextSelectorService();
     this._historyService = new ChatHistoryService(this._context);
     this._codeContextManager = new CodeContextManager();

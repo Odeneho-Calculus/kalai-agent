@@ -677,7 +677,21 @@ export class CodeContextManager {
             const packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**');
             if (packageJsonFiles.length > 0) {
                 const content = await vscode.workspace.fs.readFile(packageJsonFiles[0]);
-                const packageJson = JSON.parse(content.toString());
+                const contentString = content.toString().trim();
+
+                // Check if content is empty or invalid
+                if (!contentString || contentString.length === 0) {
+                    console.warn('Package.json file is empty');
+                    return;
+                }
+
+                // Validate JSON structure before parsing
+                if (!contentString.startsWith('{') || !contentString.endsWith('}')) {
+                    console.warn('Package.json file appears to be corrupted or incomplete');
+                    return;
+                }
+
+                const packageJson = JSON.parse(contentString);
                 const targetContext = context || this.currentContext;
                 targetContext.dependencies = {
                     ...packageJson.dependencies,
@@ -686,6 +700,9 @@ export class CodeContextManager {
             }
         } catch (error) {
             console.warn('Failed to read package.json:', error);
+            // Initialize empty dependencies to prevent further errors
+            const targetContext = context || this.currentContext;
+            targetContext.dependencies = {};
         }
     }
 

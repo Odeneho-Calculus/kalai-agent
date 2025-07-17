@@ -119,6 +119,258 @@
         "title": "Kalai: Clear Conversation",
         "category": "Kalai Agent",
         "icon": "$(clear-all)"
+      },
+      {
+        "command": "kalai-agent.switchToChatMode",
+        "title": "Kalai: Switch to Chat Mode",
+        "category": "Kalai Agent",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "kalai-agent.switchToCodingAgentMode",
+        "title": "Kalai: Switch to Coding Agent Mode",
+        "category": "Kalai Agent",
+        "icon": "$(robot)"
+      },
+      {
+        "command": "kalai-agent.switchToCoffeeMode",
+        "title": "Kalai: Switch to Coffee Mode (Autonomous)",
+        "category": "Kalai Agent",
+        "icon": "$(coffee)"
+      },
+      {
+        "command": "kalai-agent.showCapabilities",
+        "title": "Kalai: Show Capabilities",
+        "category": "Kalai Agent",
+        "icon": "$(info)"
+      },
+      {
+        "command": "kalai-agent.getSessionSummary",
+        "title": "Kalai: Get Session Summary",
+        "category": "Kalai Agent",
+        "icon": "$(timeline-view-icon)"
+      },
+      {
+        "command": "kalai-agent.reinitializeRepo",
+        "title": "Kalai: Reinitialize Repository Analysis",
+        "category": "Kalai Agent",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "kalai-agent.showModeSelector",
+        "title": "Kalai: Show Mode Selector",
+        "category": "Kalai Agent",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "kalai-agent.showModeDetails",
+        "title": "Kalai: Show Mode Details",
+        "category": "Kalai Agent",
+        "icon": "$(info)"
+      },
+      {
+        "command": "kalai-agent.generateMultiFileCode",
+        "title": "Kalai: Generate Multi-File Code",
+        "category": "Kalai Agent",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "kalai-agent.performAdvancedRefactoring",
+        "title": "Kalai: Advanced Refactoring",
+        "category": "Kalai Agent",
+        "icon": "$(symbol-method)"
+      },
+      {
+        "command": "kalai-agent.validateCode",
+        "title": "Kalai: Validate Code",
+        "category": "Kalai Agent",
+        "icon": "$(check)"
+      },
+      {
+        "command": "kalai-agent.autoFixErrors",
+        "title": "Kalai: Auto-Fix Errors",
+        "category": "Kalai Agent",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "kalai-agent.enableCoffeeMode",
+        "title": "Kalai: Enable Coffee Mode",
+        "category": "Kalai Agent",
+        "icon": "$(coffee)"
+      },
+      {
+        "command": "kalai-agent.disableCoffeeMode",
+        "title": "Kalai: Disable Coffee Mode",
+        "category": "Kalai Agent",
+        "icon": "$(coffee)"
+      },
+      {
+        "command": "kalai-agent.showCoffeeModeStatus",
+        "title": "Kalai: Show Coffee Mode Status",
+        "category": "Kalai Agent",
+        "icon": "$(info)"
+      },
+      {
+        "command": "kalai-agent.showRealTimeFeedback",
+        "title": "Kalai: Show Real-Time Feedback",
+        "category": "Kalai Agent",
+        "icon": "$(feedback)"
+      },
+      {
+        "command": "kalai-agent.showValidationResults",
+        "title": "Kalai: Show Validation Results",
+        "category": "Kalai Agent",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "kalai-agent.generateTestSuite",
+        "title": "Kalai: Generate Test Suite",
+        "category": "Kalai Agent",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "kalai-agent.runTestSuite",
+        "title": "Kalai: Run Test Suite",
+        "category": "Kalai Agent",
+        "icon": "$(play)"
+      },
+      {
+        "command": "kalai-agent.runPerformanceBenchmark",
+        "title": "Kalai: Run Performance Benchmark",
+        "category": "Kalai Agent",
+        "icon": "$(pulse)"
+      },
+      {
+        "command": "kalai-agent.startPerformanceMonitoring",
+        "title": "Kalai: Start Performance Monitoring",
+        "category": "Kalai Agent",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "kalai-agent.stopPerformanceMonitoring",
+        "title": "Kalai: Stop Performance Monitoring",
+        "category": "Kalai Agent",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "kalai-agent.showPerformanceReport",
+        "title": "Kalai: Show Performance Report",
+        "category": "Kalai Agent",
+        "icon": "$(graph-line)"
+      },
+      {
+        "command": "kalai-agent.generatePerformanceReport",
+        "title": "Kalai: Generate Performance Report",
+        "category": "Kalai Agent",
+        "icon": "$(graph-scatter)"
+      },
+      {
+        "command": "kalai-agent.analyzeSemantics",
+        "title": "Kalai: Analyze Semantics",
+        "category": "Kalai Agent",
+        "icon": "$(symbol-structure)"
+      },
+      {
+        "command": "kalai-agent.analyzeCodeQuality",
+        "title": "Kalai: Analyze Code Quality",
+        "category": "Kalai Agent",
+        "icon": "$(star)"
+      },
+      {
+        "command": "kalai-agent.generateRepositoryInsights",
+        "title": "Kalai: Generate Repository Insights",
+        "category": "Kalai Agent",
+        "icon": "$(repo)"
+      },
+      {
+        "command": "kalai-agent.predictCodeSuggestions",
+        "title": "Kalai: Predict Code Suggestions",
+        "category": "Kalai Agent",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "kalai-agent.clearAnalysisCache",
+        "title": "Kalai: Clear Analysis Cache",
+        "category": "Kalai Agent",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "kalai-agent.showAnalysisStats",
+        "title": "Kalai: Show Analysis Statistics",
+        "category": "Kalai Agent",
+        "icon": "$(graph-line)"
+      },
+      {
+        "command": "kalai-agent.switchAIModel",
+        "title": "Kalai: Switch AI Model",
+        "category": "Kalai Agent",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "kalai-agent.showModelPerformance",
+        "title": "Kalai: Show Model Performance",
+        "category": "Kalai Agent",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "kalai-agent.shareCodeContext",
+        "title": "Kalai: Share Code Context",
+        "category": "Kalai Agent",
+        "icon": "$(share)"
+      },
+      {
+        "command": "kalai-agent.searchKnowledgeBase",
+        "title": "Kalai: Search Knowledge Base",
+        "category": "Kalai Agent",
+        "icon": "$(search)"
+      },
+      {
+        "command": "kalai-agent.generateTeamInsights",
+        "title": "Kalai: Generate Team Insights",
+        "category": "Kalai Agent",
+        "icon": "$(organization)"
+      },
+      {
+        "command": "kalai-agent.managePlugins",
+        "title": "Kalai: Manage Plugins",
+        "category": "Kalai Agent",
+        "icon": "$(extensions)"
+      },
+      {
+        "command": "kalai-agent.installPlugin",
+        "title": "Kalai: Install Plugin",
+        "category": "Kalai Agent",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "kalai-agent.manageIntegrations",
+        "title": "Kalai: Manage Integrations",
+        "category": "Kalai Agent",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "kalai-agent.triggerCIPipeline",
+        "title": "Kalai: Trigger CI Pipeline",
+        "category": "Kalai Agent",
+        "icon": "$(play-circle)"
+      },
+      {
+        "command": "kalai-agent.sendTeamNotification",
+        "title": "Kalai: Send Team Notification",
+        "category": "Kalai Agent",
+        "icon": "$(bell)"
+      },
+      {
+        "command": "kalai-agent.runSecurityScan",
+        "title": "Kalai: Run Security Scan",
+        "category": "Kalai Agent",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "kalai-agent.showCloudResources",
+        "title": "Kalai: Show Cloud Resources",
+        "category": "Kalai Agent",
+        "icon": "$(cloud)"
       }
     ],
     "viewsContainers": {
@@ -210,6 +462,132 @@
         },
         {
           "command": "kalai-agent.clearConversation"
+        },
+        {
+          "command": "kalai-agent.switchToChatMode"
+        },
+        {
+          "command": "kalai-agent.switchToCodingAgentMode"
+        },
+        {
+          "command": "kalai-agent.switchToCoffeeMode"
+        },
+        {
+          "command": "kalai-agent.showCapabilities"
+        },
+        {
+          "command": "kalai-agent.getSessionSummary"
+        },
+        {
+          "command": "kalai-agent.reinitializeRepo"
+        },
+        {
+          "command": "kalai-agent.showModeSelector"
+        },
+        {
+          "command": "kalai-agent.showModeDetails"
+        },
+        {
+          "command": "kalai-agent.generateMultiFileCode"
+        },
+        {
+          "command": "kalai-agent.performAdvancedRefactoring"
+        },
+        {
+          "command": "kalai-agent.validateCode"
+        },
+        {
+          "command": "kalai-agent.autoFixErrors"
+        },
+        {
+          "command": "kalai-agent.enableCoffeeMode"
+        },
+        {
+          "command": "kalai-agent.disableCoffeeMode"
+        },
+        {
+          "command": "kalai-agent.showCoffeeModeStatus"
+        },
+        {
+          "command": "kalai-agent.showRealTimeFeedback"
+        },
+        {
+          "command": "kalai-agent.showValidationResults"
+        },
+        {
+          "command": "kalai-agent.generateTestSuite"
+        },
+        {
+          "command": "kalai-agent.runTestSuite"
+        },
+        {
+          "command": "kalai-agent.runPerformanceBenchmark"
+        },
+        {
+          "command": "kalai-agent.startPerformanceMonitoring"
+        },
+        {
+          "command": "kalai-agent.stopPerformanceMonitoring"
+        },
+        {
+          "command": "kalai-agent.showPerformanceReport"
+        },
+        {
+          "command": "kalai-agent.generatePerformanceReport"
+        },
+        {
+          "command": "kalai-agent.analyzeSemantics"
+        },
+        {
+          "command": "kalai-agent.analyzeCodeQuality"
+        },
+        {
+          "command": "kalai-agent.generateRepositoryInsights"
+        },
+        {
+          "command": "kalai-agent.predictCodeSuggestions"
+        },
+        {
+          "command": "kalai-agent.clearAnalysisCache"
+        },
+        {
+          "command": "kalai-agent.showAnalysisStats"
+        },
+        {
+          "command": "kalai-agent.switchAIModel"
+        },
+        {
+          "command": "kalai-agent.showModelPerformance"
+        },
+        {
+          "command": "kalai-agent.shareCodeContext"
+        },
+        {
+          "command": "kalai-agent.searchKnowledgeBase"
+        },
+        {
+          "command": "kalai-agent.generateTeamInsights"
+        },
+        {
+          "command": "kalai-agent.managePlugins"
+        },
+        {
+          "command": "kalai-agent.installPlugin"
+        },
+        {
+          "command": "kalai-agent.manageIntegrations"
+        },
+        {
+          "command": "kalai-agent.triggerCIPipeline"
+        },
+        {
+          "command": "kalai-agent.sendTeamNotification"
+        },
+        {
+          "command": "kalai-agent.runSecurityScan"
+        },
+        {
+          "command": "kalai-agent.showCloudResources"
         }
       ],
       "view/title": [
@@ -225,6 +603,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "node esbuild.config.js",
     "watch": "node -e \"const { build, extensionConfig, webviewConfig } = require('./esbuild.config.js'); const esbuild = require('esbuild'); Promise.all([esbuild.context(extensionConfig).then(ctx => ctx.watch()), esbuild.context(webviewConfig).then(ctx => ctx.watch())]).then(() => console.log('Watching for changes...'));\"",
+    "debug": "npm run compile",
     "package": "npm run compile && vsce package",
     "publish": "vsce publish"
   },
@@ -237,7 +616,9 @@
     "markdown-it": "^13.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-markdown": "^8.0.7"
+    "react-markdown": "^8.0.7",
+    "crypto": "^1.0.1",
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",

@@ -20,6 +20,12 @@ export class WebSearchService {
   private cache: Map<string, TechnicalInfo> = new Map();
   private readonly CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
+  public async search(query: string): Promise<WebSearchResult[]> {
+    // Alias for searchTechnicalInfo that returns results directly
+    const info = await this.searchTechnicalInfo(query);
+    return info ? info.sources : [];
+  }
+
   public async searchTechnicalInfo(query: string): Promise<TechnicalInfo | null> {
     const cacheKey = query.toLowerCase().trim();
 
