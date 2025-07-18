@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { ChatViewProvider } from './providers/chatViewProvider';
 import { AdvancedCommands } from './commands/advancedCommands';
 import { handleEditWithAI } from './commands/editWithAI';
+import { registerSecurityCommands } from './commands/securityCommands';
+import { ApiKeyService } from './services/apiKeyService';
 import { RepositoryAnalysisService } from './services/repositoryAnalysisService';
 import { TaskOrchestrationService } from './services/taskOrchestrationService';
 import { AIService } from './services/aiService';
@@ -38,11 +40,14 @@ export function activate(context: vscode.ExtensionContext) {
 
   console.log('🚀 Kalai Agent with Repo Grokking™ is now active!');
 
+  // Initialize API key service
+  const apiKeyService = new ApiKeyService(context);
+
   // Initialize enhanced services
   const repositoryAnalysisService = new RepositoryAnalysisService();
   const webSearchService = new WebSearchService();
   const taskOrchestrationService = new TaskOrchestrationService(repositoryAnalysisService, new AIService());
-  const enhancedAIService = new AIService(repositoryAnalysisService, taskOrchestrationService, webSearchService);
+  const enhancedAIService = new AIService(repositoryAnalysisService, taskOrchestrationService, webSearchService, apiKeyService);
 
   // Initialize Phase 3 services
   const validationService = new ValidationService(repositoryAnalysisService, enhancedAIService);
@@ -142,29 +147,83 @@ export function activate(context: vscode.ExtensionContext) {
     console.error('Background initialization failed:', error);
   });
 
+  // Helper function to check API key before running AI commands
+  const requireApiKey = async (commandName: string, callback: () => Promise<void> | void) => {
+    const config = vscode.workspace.getConfiguration('kalai-agent');
+    const modelName = config.get<string>('modelName', 'moonshotai/kimi-k2:free');
+
+    if (!apiKeyService.isApiKeyConfigured(modelName)) {
+      const provider = apiKeyService.getProviderDisplayName(modelName);
+      const action = await vscode.window.showWarningMessage(
+        `🔑 ${commandName} requires an API key for ${provider}. Configure it in settings first.`,
+        'Configure API Key',
+        'Cancel'
+      );
+
+      if (action === 'Configure API Key') {
+        vscode.commands.executeCommand('kalai-agent.openSettings');
+      }
+      return;
+    }
+
+    await callback();
+  };
+
+  // Check API key configuration on startup
+  setTimeout(() => {
+    const config = vscode.workspace.getConfiguration('kalai-agent');
+    const modelName = config.get<string>('modelName', 'moonshotai/kimi-k2:free');
+
+    if (!apiKeyService.isApiKeyConfigured(modelName)) {
+      vscode.window.showInformationMessage(
+        '🔑 API key not configured. Configure it in settings to use Kalai Agent.',
+        'Open Settings'
+      ).then(selection => {
+        if (selection === 'Open Settings') {
+          vscode.commands.executeCommand('kalai-agent.openSettings');
+        }
+      });
+    }
+  }, 3000); // Check after 3 seconds
+
   // Register all commands
   const commands = [
-    // Original commands
+    // Original commands with API key protection
     vscode.commands.registerCommand('kalai-agent.startChat', () => {
-      vscode.commands.executeCommand('kalai-agent.chatView.focus');
+      requireApiKey('Start Chat', async () => {
+        vscode.commands.executeCommand('kalai-agent.chatView.focus');
+      });
     }),
 
     vscode.commands.registerCommand('kalai-agent.editWithAI', async () => {
-      const editor = vscode.window.activeTextEditor;
-      if (editor) {
-        await handleEditWithAI(editor);
-      } else {
-        vscode.window.showErrorMessage('No active editor found');
-      }
+      await requireApiKey('Edit with AI', async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          await handleEditWithAI(editor);
+        } else {
+          vscode.window.showErrorMessage('No active editor found');
+        }
+      });
     }),
 
-    // Advanced commands
-    vscode.commands.registerCommand('kalai-agent.explainCode', () => advancedCommands.explainCode()),
-    vscode.commands.registerCommand('kalai-agent.generateTests', () => advancedCommands.generateTests()),
-    vscode.commands.registerCommand('kalai-agent.optimizePerformance', () => advancedCommands.optimizePerformance()),
-    vscode.commands.registerCommand('kalai-agent.findSecurityIssues', () => advancedCommands.findSecurityIssues()),
-    vscode.commands.registerCommand('kalai-agent.generateDocumentation', () => advancedCommands.generateDocumentation()),
-    vscode.commands.registerCommand('kalai-agent.refactorCode', () => advancedCommands.refactorCode()),
+    // Settings command
+    vscode.commands.registerCommand('kalai-agent.openSettings', () => {
+      vscode.commands.executeCommand('workbench.action.openSettings', 'kalai-agent');
+    }),
+
+    // Advanced commands with API key protection
+    vscode.commands.registerCommand('kalai-agent.explainCode', () =>
+      requireApiKey('Explain Code', () => advancedCommands.explainCode())),
+    vscode.commands.registerCommand('kalai-agent.generateTests', () =>
+      requireApiKey('Generate Tests', () => advancedCommands.generateTests())),
+    vscode.commands.registerCommand('kalai-agent.optimizePerformance', () =>
+      requireApiKey('Optimize Performance', () => advancedCommands.optimizePerformance())),
+    vscode.commands.registerCommand('kalai-agent.findSecurityIssues', () =>
+      requireApiKey('Find Security Issues', () => advancedCommands.findSecurityIssues())),
+    vscode.commands.registerCommand('kalai-agent.generateDocumentation', () =>
+      requireApiKey('Generate Documentation', () => advancedCommands.generateDocumentation())),
+    vscode.commands.registerCommand('kalai-agent.refactorCode', () =>
+      requireApiKey('Refactor Code', () => advancedCommands.refactorCode())),
     vscode.commands.registerCommand('kalai-agent.searchCodebase', () => advancedCommands.searchCodebase()),
     vscode.commands.registerCommand('kalai-agent.analyzeArchitecture', () => advancedCommands.analyzeProjectArchitecture()),
     vscode.commands.registerCommand('kalai-agent.getLatestTechInfo', () => advancedCommands.getLatestTechInfo()),
@@ -1399,11 +1458,41 @@ ${integration.type.category === 'cicd' ? 'CI/CD pipeline integration' :
     vscode.commands.registerCommand('kalai-agent.clearConversation', () => {
       enhancedAIService.clearConversationHistory();
       chatViewProvider.sendMessage('Conversation cleared!');
+    }),
+
+    // API Key Management commands
+    vscode.commands.registerCommand('kalai-agent.setupApiKey', () => {
+      const config = vscode.workspace.getConfiguration('kalai-agent');
+      const modelName = config.get<string>('modelName', 'moonshotai/kimi-k2:free');
+      const provider = getProviderForModel(modelName);
+      if (provider) {
+        apiKeyManager.promptForApiKeySetup(modelName, provider.name);
+      }
+    }),
+
+    vscode.commands.registerCommand('kalai-agent.showApiKeyStatus', () => {
+      extensionGuardian.showApiKeyStatus();
+    }),
+
+    vscode.commands.registerCommand('kalai-agent.changeModel', () => {
+      apiKeyManager.showModelSelector();
+    }),
+
+    vscode.commands.registerCommand('kalai-agent.refreshApiKey', () => {
+      const config = vscode.workspace.getConfiguration('kalai-agent');
+      const modelName = config.get<string>('modelName', 'moonshotai/kimi-k2:free');
+      const provider = getProviderForModel(modelName);
+      if (provider) {
+        apiKeyManager.promptApiKeyInput(provider.name);
+      }
     })
   ];
 
   // Add all commands to subscriptions
   commands.forEach(command => context.subscriptions.push(command));
+
+  // Register security commands
+  registerSecurityCommands(context);
 
   // Add service disposal to subscriptions
   context.subscriptions.push({

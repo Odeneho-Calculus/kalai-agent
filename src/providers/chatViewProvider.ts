@@ -275,6 +275,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
           this.handleClearConversation(webviewView);
           break;
 
+        case 'openSettings':
+          vscode.commands.executeCommand('kalai-agent.openSettings');
+          break;
+
         case 'webviewReady':
           // Send initial context when webview is ready
           await this.handleWebviewReady(webviewView);

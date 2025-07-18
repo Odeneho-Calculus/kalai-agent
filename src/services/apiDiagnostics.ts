@@ -36,21 +36,22 @@ export class APIDiagnostics {
     private async checkConfiguration(): Promise<ConfigCheck> {
         try {
             const config = vscode.workspace.getConfiguration('kalai-agent');
-            let secureConfig: any = null;
 
-            try {
-                secureConfig = require('../config/secure.config').SECURE_CONFIG;
-            } catch (error) {
-                // Secure config not available
-            }
+            // Check API keys configuration
+            const openrouterKey = config.get<string>('apiKeys.openrouter');
+            const openaiKey = config.get<string>('apiKeys.openai');
+            const anthropicKey = config.get<string>('apiKeys.anthropic');
+            const googleKey = config.get<string>('apiKeys.google');
 
-            const apiKey = config.get<string>('apiKey') || secureConfig?.defaultApiKey;
-            const apiEndpoint = config.get<string>('apiEndpoint') || secureConfig?.defaultApiEndpoint;
-            const modelName = config.get<string>('modelName') || secureConfig?.defaultModelName;
+            const apiEndpoint = config.get<string>('apiEndpoint');
+            const modelName = config.get<string>('modelName');
+
+            // Check if at least one API key is configured
+            const hasApiKey = !!(openrouterKey || openaiKey || anthropicKey || googleKey);
 
             return {
                 status: 'success',
-                apiKeyConfigured: !!apiKey && apiKey !== 'your-openrouter-api-key-here',
+                apiKeyConfigured: hasApiKey,
                 apiEndpointConfigured: !!apiEndpoint,
                 modelNameConfigured: !!modelName,
                 currentModel: modelName || 'not configured',
@@ -207,7 +208,7 @@ export class APIDiagnostics {
         const recommendations: string[] = [];
 
         if (!report.configCheck.apiKeyConfigured) {
-            recommendations.push('Configure your OpenRouter API key in VS Code settings or secure.config.ts');
+            recommendations.push('Configure your API key in VS Code settings (Kalai Agent → API Keys)');
         }
 
         if (!report.networkCheck.internetConnected) {

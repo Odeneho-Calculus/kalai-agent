@@ -11,13 +11,17 @@
 ```
 
 ### 2. **Check Your API Key**
-Your API key is currently configured as: `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`
+Your API key should be configured in your secure configuration file or VS Code settings.
 
-**Verify this key:**
+**Verify your key:**
 1. Go to [OpenRouter.ai](https://openrouter.ai)
 2. Log in to your account
 3. Check API Keys section
 4. Ensure the key is active and has credits
+
+**Configure your key securely:**
+- Use VS Code Settings (Ctrl+,) → Search "kalai-agent" → Set "Api Key"
+- Or update `src/config/secure.config.ts` (never commit this file)
 
 ### 3. **Common Issues and Solutions**
 
@@ -85,12 +89,14 @@ Your API key is currently configured as: `sk-or-v1-a6762208bb125c83bc6fc6377f473
 Location: `src/config/secure.config.ts`
 ```typescript
 export const SECURE_CONFIG: SecureConfig = {
-    defaultApiKey: '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',
+    defaultApiKey: 'REPLACE_WITH_YOUR_API_KEY', // Replace with your actual API key
     defaultApiEndpoint: 'https://openrouter.ai/api/v1/chat/completions',
     defaultModelName: 'meta-llama/llama-3.3-70b-instruct:free',
     // ... other config
 };
 ```
+
+**⚠️ SECURITY NOTE:** Never commit this file to version control. It's automatically ignored by .gitignore.
 
 ### 5. **Testing Commands**
 

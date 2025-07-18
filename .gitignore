@@ -13,3 +13,26 @@ src/config/secure.config.js
 *.secure.*
 .env
 .env.local
+.env.production
+.env.development
+
+# API Keys and secrets
+**/apikeys.txt
+**/secrets.txt
+**/*secret*
+**/*key*
+**/*token*
+**/*credential*
+
+# Common secret file patterns
+.secrets
+secrets.json
+config.json
+private.json
+credentials.json
+
+# OS-specific files that might contain secrets
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp

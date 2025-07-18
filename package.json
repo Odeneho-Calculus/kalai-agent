@@ -383,6 +383,72 @@
         "title": "Kalai: Show Cloud Resources",
         "category": "Kalai Agent",
         "icon": "$(cloud)"
+      },
+      {
+        "command": "kalai-agent.setupSecureConfiguration",
+        "title": "Kalai: Setup Secure Configuration",
+        "category": "Kalai Agent Security",
+        "icon": "$(lock)"
+      },
+      {
+        "command": "kalai-agent.runSecurityAudit",
+        "title": "Kalai: Run Security Audit",
+        "category": "Kalai Agent Security",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "kalai-agent.validateApiConfiguration",
+        "title": "Kalai: Validate API Configuration",
+        "category": "Kalai Agent Security",
+        "icon": "$(verified)"
+      },
+      {
+        "command": "kalai-agent.clearApiConfiguration",
+        "title": "Kalai: Clear API Configuration",
+        "category": "Kalai Agent Security",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "kalai-agent.showSecurityStatus",
+        "title": "Kalai: Show Security Status",
+        "category": "Kalai Agent Security",
+        "icon": "$(info)"
+      },
+      {
+        "command": "kalai-agent.rotateApiKey",
+        "title": "Kalai: Rotate API Key",
+        "category": "Kalai Agent Security",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "kalai-agent.exportSecurityReport",
+        "title": "Kalai: Export Security Report",
+        "category": "Kalai Agent Security",
+        "icon": "$(export)"
+      },
+      {
+        "command": "kalai-agent.setupApiKey",
+        "title": "Kalai: Setup API Key",
+        "category": "Kalai Agent Setup",
+        "icon": "$(key)"
+      },
+      {
+        "command": "kalai-agent.showApiKeyStatus",
+        "title": "Kalai: Show API Key Status",
+        "category": "Kalai Agent Setup",
+        "icon": "$(info)"
+      },
+      {
+        "command": "kalai-agent.changeModel",
+        "title": "Kalai: Change AI Model",
+        "category": "Kalai Agent Setup",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "kalai-agent.refreshApiKey",
+        "title": "Kalai: Refresh API Key",
+        "category": "Kalai Agent Setup",
+        "icon": "$(refresh)"
       }
     ],
     "viewsContainers": {
@@ -616,12 +682,6 @@
     "configuration": {
       "title": "Kalai Agent",
       "properties": {
-        "kalai-agent.apiKey": {
-          "type": "string",
-          "default": "",
-          "description": "OpenRouter API key for AI model access (Optional: Extension includes default key for immediate use)",
-          "scope": "application"
-        },
         "kalai-agent.modelName": {
           "type": "string",
           "default": "moonshotai/kimi-k2:free",
@@ -655,6 +715,37 @@
           "minimum": 0,
           "maximum": 2,
           "description": "Temperature for AI responses (0-2)"
+        },
+        "kalai-agent.apiKeys.openrouter": {
+          "type": "string",
+          "default": "",
+          "description": "OpenRouter API key for free and paid models"
+        },
+        "kalai-agent.apiKeys.openai": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key for GPT models"
+        },
+        "kalai-agent.apiKeys.anthropic": {
+          "type": "string",
+          "default": "",
+          "description": "Anthropic API key for Claude models"
+        },
+        "kalai-agent.apiKeys.google": {
+          "type": "string",
+          "default": "",
+          "description": "Google API key for Gemini models"
+        },
+        "kalai-agent.apiKeys.activeProvider": {
+          "type": "string",
+          "default": "openrouter",
+          "enum": [
+            "openrouter",
+            "openai",
+            "anthropic",
+            "google"
+          ],
+          "description": "Active API provider"
         }
       }
     }

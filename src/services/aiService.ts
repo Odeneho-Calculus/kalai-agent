@@ -6,13 +6,10 @@ import { TaskOrchestrationService, TaskDefinition, AgenticTask, TaskContext } fr
 import { WebSearchService } from './webSearchService';
 import { PerformanceMonitor, withPerformanceTracking } from '../utils/performanceMonitor';
 
-// Secure configuration import with fallback
-let SECURE_CONFIG: any = null;
-try {
-  SECURE_CONFIG = require('../config/secure.config').SECURE_CONFIG;
-} catch (error) {
-  console.warn('⚠️  Kalai Agent: Secure configuration not found. Using user settings only.');
-}
+// Import environment manager for basic config
+import { environmentManager, getApiEndpoint, getModelName } from '../config/environment';
+import { securityManager } from '../utils/security';
+import { ApiKeyService } from './apiKeyService';
 
 interface AIModelResponse {
   choices: {
@@ -147,62 +144,103 @@ export class AIService {
   private minRequestInterval: number = 1000; // Minimum 1 second between requests
   private requestQueue: Array<{ resolve: Function, reject: Function, messages: any[] }> = [];
   private isProcessingQueue: boolean = false;
+  private apiKeyService?: ApiKeyService;
 
   constructor(
     repositoryAnalysisService?: RepositoryAnalysisService,
     taskOrchestrationService?: TaskOrchestrationService,
-    webSearchService?: WebSearchService
+    webSearchService?: WebSearchService,
+    apiKeyService?: ApiKeyService
   ) {
     this.repositoryAnalysisService = repositoryAnalysisService || null;
     this.taskOrchestrationService = taskOrchestrationService || null;
     this.webSearchService = webSearchService || null;
+    this.apiKeyService = apiKeyService;
 
-    // Load configuration from VS Code settings
-    this.loadConfiguration();
-
+    // Initialize conversation context first
     this.conversationHistory = this.initializeConversationContext();
+
+    // Load configuration asynchronously
+    this.initializeSecurely();
   }
 
-  private loadConfiguration(): void {
-    const config = vscode.workspace.getConfiguration('kalai-agent');
-
-    // Priority: User Settings > Secure Config > Defaults
-    this.API_KEY = config.get<string>('apiKey') ||
-      (SECURE_CONFIG?.defaultApiKey) ||
-      '';
-
-    this.API_ENDPOINT = config.get<string>('apiEndpoint') ||
-      (SECURE_CONFIG?.defaultApiEndpoint) ||
-      'https://openrouter.ai/api/v1/chat/completions';
-
-    this.MODEL_NAME = config.get<string>('modelName') ||
-      (SECURE_CONFIG?.defaultModelName) ||
-      'moonshotai/kimi-k2:free';
-
-    this.maxTokens = config.get<number>('maxTokens') || 1024;
-    this.temperature = config.get<number>('temperature') || 0.7;
-
-    // Validate API key availability
-    if (!this.API_KEY) {
-      console.error('❌ Kalai Agent: No API key configured. Please set up your API key in VS Code settings or secure configuration.');
-      vscode.window.showErrorMessage(
-        'Kalai Agent: No API key configured. Please configure your OpenRouter API key in settings.',
-        'Open Settings'
-      ).then(selection => {
-        if (selection === 'Open Settings') {
-          vscode.commands.executeCommand('workbench.action.openSettings', 'kalai-agent.apiKey');
-        }
-      });
-    } else {
-      console.log('✅ Kalai Agent: API key loaded successfully');
+  private async initializeSecurely(): Promise<void> {
+    try {
+      await this.loadConfiguration();
+      console.log('🔒 Kalai Agent: Secure initialization completed');
+    } catch (error) {
+      console.error('❌ Kalai Agent: Secure initialization failed:', error);
     }
+  }
+
+  private async loadConfiguration(): Promise<void> {
+    try {
+      // Get VS Code settings for model and other parameters
+      const config = vscode.workspace.getConfiguration('kalai-agent');
+      this.MODEL_NAME = config.get<string>('modelName') || 'moonshotai/kimi-k2:free';
+      this.API_ENDPOINT = config.get<string>('apiEndpoint') || 'https://openrouter.ai/api/v1/chat/completions';
+      this.maxTokens = config.get<number>('maxTokens') || 1024;
+      this.temperature = config.get<number>('temperature') || 0.7;
+
+      // Get API key from API key service - required
+      if (!this.apiKeyService) {
+        throw new Error('API key service not initialized');
+      }
+
+      console.log(`🔍 [loadConfiguration] Checking API key for model: ${this.MODEL_NAME}`);
+      const apiKey = this.apiKeyService.getApiKeyForModel(this.MODEL_NAME);
+
+      if (!apiKey) {
+        console.log(`❌ [loadConfiguration] No API key found for model: ${this.MODEL_NAME}`);
+        const settings = this.apiKeyService.getApiKeySettings();
+        console.log('[loadConfiguration] Available API keys:', {
+          openrouter: settings.openrouter ? `Found (${settings.openrouter.substring(0, 8)}...)` : 'Not set',
+          openai: settings.openai ? `Found (${settings.openai.substring(0, 8)}...)` : 'Not set',
+          anthropic: settings.anthropic ? `Found (${settings.anthropic.substring(0, 8)}...)` : 'Not set',
+          google: settings.google ? `Found (${settings.google.substring(0, 8)}...)` : 'Not set'
+        });
+        // DON'T throw error, just log and continue
+        console.log(`⚠️ [loadConfiguration] API key not found during startup, but will be checked again during actual usage`);
+        return;
+      }
+
+      this.API_KEY = apiKey;
+      console.log(`✅ Kalai Agent: API key loaded successfully for ${this.MODEL_NAME}`);
+
+    } catch (error) {
+      console.error('❌ Kalai Agent: Configuration error:', error);
+      // Don't show notification during startup - API key will be checked during actual usage
+    }
+  }
+
+  private handleConfigurationError(): void {
+    vscode.window.showErrorMessage(
+      'Kalai Agent: API key not configured. Please set up your OpenRouter API key.',
+      'Setup Securely',
+      'Open Settings',
+      'Help'
+    ).then(selection => {
+      switch (selection) {
+        case 'Setup Securely':
+          vscode.commands.executeCommand('kalai-agent.setupSecureConfiguration');
+          break;
+        case 'Open Settings':
+          vscode.commands.executeCommand('workbench.action.openSettings', 'kalai-agent.apiKey');
+          break;
+        case 'Help':
+          vscode.env.openExternal(vscode.Uri.parse('https://github.com/Odeneho-Calculus/kalai-agent/blob/main/SECURITY.md'));
+          break;
+      }
+    });
   }
 
   /**
    * Refresh configuration when settings change
    */
-  public refreshConfiguration(): void {
-    this.loadConfiguration();
+  public async refreshConfiguration(): Promise<void> {
+    // Clear current configuration to force re-evaluation
+    environmentManager.clearConfiguration();
+    await this.loadConfiguration();
   }
 
   private initializeConversationContext(): EnhancedConversationContext {
@@ -1096,6 +1134,12 @@ Guidelines:
    */
   public async processMessage(message: string, context?: AIRequestContext): Promise<string> {
     try {
+      // Ensure configuration is loaded
+      if (!this.API_KEY) {
+        console.log('🔄 Configuration not loaded yet, loading now...');
+        await this.loadConfiguration();
+      }
+
       // Update conversation history
       this.conversationHistory.messages.push({
         role: 'user',
@@ -1359,8 +1403,16 @@ Consider the current project context and dependencies. Respond only with the mod
 
   private async callAIModel(messages: any[], retryCount = 0): Promise<string> {
     try {
+      // If API key is not loaded, try to load it now
       if (!this.API_KEY) {
-        throw new Error('API key is not configured. Please check your settings.');
+        console.log('🔄 API key not loaded during startup, attempting to load now...');
+        const apiKey = this.apiKeyService?.getApiKeyForModel(this.MODEL_NAME);
+        if (apiKey) {
+          this.API_KEY = apiKey;
+          console.log('✅ API key loaded successfully during runtime');
+        } else {
+          throw new Error('API key is not configured. Please check your settings.');
+        }
       }
 
       // Calculate token usage and adjust max_tokens dynamically
@@ -1384,13 +1436,22 @@ Consider the current project context and dependencies. Respond only with the mod
         console.log('Messages truncated due to token limit');
       }
 
+      console.log(`🔑 Using API key: ${this.API_KEY ? this.API_KEY.substring(0, 8) + '...' : 'NONE'}`);
+      console.log(`🔑 API key length: ${this.API_KEY?.length || 0}`);
+      console.log(`🔑 API key starts with: ${this.API_KEY?.substring(0, 20) || 'NONE'}`);
+
       const headers = {
         'Authorization': `Bearer ${this.API_KEY}`,
         'HTTP-Referer': 'https://github.com/Odeneho-Calculus/kalai-agent',
         'X-Title': 'Kalai Agent',
-        'Content-Type': 'application/json',
-        'OpenAI-Organization': 'org-yourOrgId' // Add if required by your API
+        'Content-Type': 'application/json'
       };
+
+      console.log('🌐 Request headers:', {
+        'Authorization': this.API_KEY ? `Bearer ${this.API_KEY.substring(0, 8)}...` : 'MISSING',
+        'Content-Type': headers['Content-Type'],
+        'HTTP-Referer': headers['HTTP-Referer']
+      });
 
       console.log('Making AI request with model:', this.MODEL_NAME);
       console.log('Request payload:', {

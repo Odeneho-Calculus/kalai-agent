@@ -6,7 +6,7 @@ This directory contains secure configuration files for the Kalai Agent extension
 
 ### Initial Setup
 1. Copy `secure.config.template.ts` to `secure.config.ts`
-2. Replace `'your-openrouter-api-key-here'` with your actual OpenRouter API key
+2. Replace `'REPLACE_WITH_YOUR_API_KEY'` with your actual OpenRouter API key
 3. The `secure.config.ts` file is automatically ignored by git for security
 
 ### Getting an OpenRouter API Key
@@ -14,7 +14,7 @@ This directory contains secure configuration files for the Kalai Agent extension
 2. Sign up or log in to your account
 3. Navigate to the **Keys** section in your dashboard
 4. Click **Create Key**
-5. Copy the generated API key (starts with `sk-or-v1-...`)
+5. Copy the generated API key (starts with the prefix pattern for OpenRouter keys)
 
 ## How It Works
 

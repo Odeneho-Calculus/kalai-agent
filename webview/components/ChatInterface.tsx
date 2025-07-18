@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Message as MessageComponent, Message } from './Message';
 import { Input } from './Input';
 import { ContextPanel } from './ContextPanel';
-import { SettingsPanel } from './SettingsPanel';
+
 import './ChatInterface.css';
 import { Delete } from '@mui/icons-material';
 
@@ -47,7 +47,7 @@ export const ChatInterface: React.FC = () => {
 
     const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
     const [showContextPanel, setShowContextPanel] = useState(false);
-    const [showSettingsPanel, setShowSettingsPanel] = useState(false);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -305,14 +305,6 @@ export const ChatInterface: React.FC = () => {
         });
     };
 
-    const handleSettingsChange = (settings: any) => {
-        // Save settings to extension
-        window.vscode?.postMessage({
-            type: 'updateSettings',
-            data: settings
-        });
-    };
-
     const handleClearChat = () => {
         setChatState(prev => ({
             ...prev,
@@ -390,8 +382,10 @@ export const ChatInterface: React.FC = () => {
                     </button>
                     <button
                         className="header-btn"
-                        onClick={() => setShowSettingsPanel(true)}
-                        title="Settings"
+                        onClick={() => {
+                            window.vscode?.postMessage({ type: 'openSettings' });
+                        }}
+                        title="Open VS Code Settings"
                     >
                         ⚙️
                     </button>
@@ -459,11 +453,7 @@ export const ChatInterface: React.FC = () => {
                 onFileSelect={handleFileSelect}
             />
 
-            <SettingsPanel
-                isVisible={showSettingsPanel}
-                onClose={() => setShowSettingsPanel(false)}
-                onSettingsChange={handleSettingsChange}
-            />
+
         </div>
     );
 };

@@ -1,0 +1,70 @@
+Sending message: hi
+webview.js:16 Posting message to extension: {type: 'sendMessage', data: {…}}
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Received sendMessage: {type: 'sendMessage', data: {…}} (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Processing message: hi (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Token management: {estimatedInputTokens: 10529, modelMaxTokens: 8192, requestedMaxTokens: 1024, adjustedMaxTokens: 512} (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Messages truncated due to token limit (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] 🔑 Using API key: sk-or-v1... (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] 🔑 API key length: 73 (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] 🔑 API key starts with: sk-or-v1-2a59c4ef603 (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] 🌐 Request headers: {Authorization: 'Bearer sk-or-v1...', Content-Type: 'application/json', HTTP-Referer: 'https://github.com/Odeneho-Calculus/kalai-agent'} (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Making AI request with model: moonshotai/kimi-k2:free (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Request payload: {model: 'moonshotai/kimi-k2:free', messages: Array(6), temperature: 0.7, max_tokens: 512, top_p: 0.95} (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] AI response status: 200 (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] AI response headers: {date: 'Fri, 18 Jul 2025 00:28:58 GMT', content-type: 'application/json', transfer-encoding: 'chunked', connection: 'close', access-control-allow-origin: '*', …} (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] AI response data (full): {
+  "id": "gen-1752798534-oqc6s3fgjvs2z0krVGeb",
+  "provider": "Chutes",
+  "model": "moonshotai/kimi-k2:free",
+  "object": "chat.completion",
+  "created": 1752798534,
+  "choices": [
+    {
+      "logprobs": null,
+      "finish_reason": "stop",
+      "native_finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Hello! I see you're working with the Kal Vue UI extension codebase. Based on the repository analysis and the code I've examined, I can help you with several areas.\n\nLooking at your project structure, I notice you have:\n\n1. **High complexity functions** that could benefit from refactoring (highlightUpdate, getComponentHierarchy, parseTemplateHierarchy)\n2. **TypeScript global type definitions** that may need optimization\n3. **Component architecture** that follows Vue patterns but has maintainability concerns\n\nWould you like me to help you with any specific aspect? For example:\n\n- **Refactor the complex functions** into smaller, more maintainable pieces\n- **Optimize the TypeScript global types** for better performance and type safety\n- **Review the component hierarchy parsing** for potential issues\n- **Improve the VS Code extension architecture** for better extensibility\n\nWhat would you like to focus on first?",
+        "refusal": null,
+        "reasoning": null
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 8258,
+    "completion_tokens": 181,
+    "total_tokens": 8439,
+    "prompt_tokens_details": null
+  }
+} (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Response data structure check: {hasData: true, hasChoices: true, choicesLength: 1, hasFirstChoice: true, hasMessage: true, …} (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+workbench.desktop.main.js:sourcemap:518 [Extension Host] ⚠️ Slow operation detected: AI_SendMessage took 12957.95ms (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
+Tds @ workbench.desktop.main.js:sourcemap:518
+$logExtensionHostMessage @ workbench.desktop.main.js:sourcemap:518
+S @ workbench.desktop.main.js:sourcemap:3397
+Q @ workbench.desktop.main.js:sourcemap:3397
+M @ workbench.desktop.main.js:sourcemap:3397
+L @ workbench.desktop.main.js:sourcemap:3397
+(anonymous) @ workbench.desktop.main.js:sourcemap:3397
+C @ workbench.desktop.main.js:sourcemap:29
+fire @ workbench.desktop.main.js:sourcemap:29
+fire @ workbench.desktop.main.js:sourcemap:542
+l.onmessage @ workbench.desktop.main.js:sourcemap:3408
+workbench.desktop.main.js:sourcemap:518 [Extension Host] Sending response: Hello! I see you're working with the Kal Vue UI extension codebase. Based on the repository analysis and the code I've examined, I can help you with several areas.
+
+Looking at your project structure, I notice you have:
+
+1. **High complexity functions** that could benefit from refactoring (highlightUpdate, getComponentHierarchy, parseTemplateHierarchy)
+2. **TypeScript global type definitions** that may need optimization
+3. **Component architecture** that follows Vue patterns but has maintainability concerns
+
+Would you like me to help you with any specific aspect? For example:
+
+- **Refactor the complex functions** into smaller, more maintainable pieces
+- **Optimize the TypeScript global types** for better performance and type safety
+- **Review the component hierarchy parsing** for potential issues
+- **Improve the VS Code extension architecture** for better extensibility
+
+What would you like to focus on first? (at console.<anonymous> (file:///c:/Users/kalculusGuy/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/api/node/extensionHostProcess.js:166:31057))
